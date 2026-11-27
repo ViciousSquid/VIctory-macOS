@@ -184,7 +184,7 @@ x86_rip=0x6fffed474b2f
 arm_pc=0x7422909d34
 ```
 
-The main GTA VI image was reported mapped at `0x6fffed550000`. The exception RIP is **0xDB4D1 below** that base, so this address is not inside the mapped main executable image. The supplied output does not identify which module owns that address.
+The main executable image was reported mapped at `0x6fffed550000`. The exception RIP is **0xDB4D1 below** that base, so this address is not inside the mapped main executable image. The supplied output does not identify which module owns that address.
 
 This matters when triaging the exception:
 
@@ -193,13 +193,13 @@ This matters when triaging the exception:
 - The executable contains many candidate AVX/vector stores, but the scan count alone does not show that any particular instruction faulted.
 - The exception appears near later pipeline activity in the log, but temporal proximity does not establish a GPU-pipeline cause.
 
-The exception remains an open investigation item. It needs module/stack attribution (and ideally a complete crash or diagnostic report) before assigning it to GTA VI code, Wine, Rosetta, or Victory.
+The exception remains an open investigation item. It needs module/stack attribution (and ideally a complete crash or diagnostic report) before assigning it to the game, Wine, Rosetta, or Victory.
 
 ## 7. Current interpretation
 
 ### Confirmed
 
-1. The tested title is GTA VI Series 1.0.2.1 with the hash recorded above.
+1. The tested game build is Series 1.0.2.1 with the hash recorded above.
 2. Victory detects 1,234 masked/vector store candidates in the executable.
 3. Fault-based title-memory tracking was off in this run.
 4. The world-stage reports show multi-second frames, tens of gigabytes of title-memory copy traffic, and substantial texture-preparation work.
