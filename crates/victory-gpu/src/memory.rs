@@ -82,6 +82,45 @@ impl Map {
     }
 }
 
+/// The most bytes of a copy one piece of it is named for in a page table,
+/// and the most its views show: a raw view holds 2^27 elements (512 MiB).
+const PIECE: u64 = 256 << 20;
+const PIECE_VIEWED: u64 = 512 << 20;
+
+/// The pieces a page table names the copy of title memory `(start, len)`
+/// in: each piece's start, the bytes it is named for, and the bytes its
+/// views show from there. A copy a view can hold whole is one piece. A
+/// longer one is named 256 MiB at a time, and each piece's views show up to
+/// 512 MiB from its start, so an access that begins in a piece's last
+/// bytes reads on through them.
+fn pieces((start, len): (u64, u64)) -> impl Iterator<Item = (u64, u64, u64)> {
+    let whole = len <= PIECE_VIEWED;
+    let count = if whole { 1 } else { len.div_ceil(PIECE) };
+    (0..count).map(move |n| {
+        if whole {
+            (start, len, len)
+        } else {
+            let at = n * PIECE;
+            (start + at, PIECE.min(len - at), PIECE_VIEWED.min(len - at))
+        }
+    })
+}
+
+#[test]
+fn long_copies_are_named_in_pieces() {
+    const MIB: u64 = 1 << 20;
+    assert_eq!(pieces((0x1000, 4 * MIB)).collect::<Vec<_>>(), [(0x1000, 4 * MIB, 4 * MIB)]);
+    assert_eq!(pieces((0, 512 * MIB)).collect::<Vec<_>>(), [(0, 512 * MIB, 512 * MIB)]);
+    assert_eq!(
+        pieces((64 * MIB, 700 * MIB)).collect::<Vec<_>>(),
+        [
+            (64 * MIB, 256 * MIB, 512 * MIB),
+            (320 * MIB, 256 * MIB, 444 * MIB),
+            (576 * MIB, 188 * MIB, 188 * MIB),
+        ]
+    );
+}
+
 /// What a heap's page table names: the copies, the level-1 index of each
 /// block (block 0 is the null one), and the copy each entry names (or none).
 #[derive(Default)]
@@ -135,13 +174,26 @@ impl Bitmap {
 /// or `Drop`, ensuring it is zeroed before returning to [`BITMAP_POOL`].
 struct PooledBitmap {
     bitmap: Option<Bitmap>,
+    /// True once `defer_after` has verified/cleared all active words and no
+    /// subsequent run has touched the bitmap; lets `Drop` return it to
+    /// [`BITMAP_POOL`] without re-scanning all 256 KiB.
+    clean: std::sync::atomic::AtomicBool,
 }
 
 impl PooledBitmap {
     fn new(bitmap: Bitmap) -> Self {
         Self {
             bitmap: Some(bitmap),
+            clean: std::sync::atomic::AtomicBool::new(false),
         }
+    }
+
+    fn mark_clean(&self) {
+        self.clean.store(true, std::sync::atomic::Ordering::Release);
+    }
+
+    fn mark_dirty(&self) {
+        self.clean.store(false, std::sync::atomic::Ordering::Release);
     }
 
     fn gpu(&self) -> u64 {
@@ -156,24 +208,34 @@ impl PooledBitmap {
     }
 }
 
+/// Zeroes any non-zero words in `marks`, skipping all-zero 4-word chunks.
+fn clear_nonzero_words(marks: &mut [u32]) {
+    let (chunks, rem) = marks.as_chunks_mut::<4>();
+    for chunk in chunks {
+        if (chunk[0] | chunk[1] | chunk[2] | chunk[3]) != 0 {
+            *chunk = [0; 4];
+        }
+    }
+    for word in rem {
+        if *word != 0 {
+            *word = 0;
+        }
+    }
+}
+
 impl Drop for PooledBitmap {
     fn drop(&mut self) {
         let Some(bitmap) = self.bitmap.take() else {
             return;
         };
-        // SAFETY: `PooledBitmap` drops only when `HostList::reset` or `Drop`
-        // releases its deferred closures after any GPU submission has finished;
-        // `bitmap.data` is mapped for `BITMAP_WORDS` dwords.
-        let marks =
-            unsafe { std::slice::from_raw_parts_mut(bitmap.data as *mut u32, BITMAP_WORDS) };
-        // `defer_after` clears non-zero words after execution and un-executed
-        // lists start clean; verify and clear any stray non-zero words before pooling.
-        if let Some(first) = marks.iter().position(|&m| m != 0) {
-            for mark in &mut marks[first..] {
-                if *mark != 0 {
-                    *mark = 0;
-                }
-            }
+        if !self.clean.load(std::sync::atomic::Ordering::Acquire) {
+            // SAFETY: `PooledBitmap` drops only when `HostList::reset` or `Drop`
+            // releases its deferred closures after any GPU submission has finished;
+            // `bitmap.data` is mapped for `BITMAP_WORDS` dwords.
+            let marks =
+                unsafe { std::slice::from_raw_parts_mut(bitmap.data as *mut u32, BITMAP_WORDS) };
+            // Clear any stray non-zero words before returning to the pool.
+            clear_nonzero_words(marks);
         }
         let overflow = {
             let mut pool = BITMAP_POOL.lock().unwrap_or_else(|e| e.into_inner());
@@ -200,7 +262,7 @@ struct Shared {
     /// The pair of null views entries without a copy name.
     null: u32,
     /// Each copy's view pair (its first slot), by copy.
-    pairs: HashMap<usize, u32>,
+    pairs: HashMap<(usize, u32), u32>,
     /// The copies' generation it names ([`crate::shadow::generation`]).
     generation: u64,
     layout: Arc<Layout>,
@@ -216,6 +278,14 @@ unsafe impl Send for Shared {}
 
 /// Page tables by view heap (the title heap's address, or [`OURS`]).
 static SHARED: Mutex<Vec<(usize, Shared)>> = Mutex::new(Vec::new());
+
+/// Monotonic high-water mark of `blocks.len()` across all page tables ever
+/// written. Using this bound (rather than a possibly shrunk or released
+/// `layout(key).blocks.len()`) guarantees `defer_missed` and `defer_after`
+/// never stop short of marks a shader wrote into higher blocks before a table
+/// shrank or its heap was released.
+static MAX_TABLE_BLOCKS: std::sync::atomic::AtomicUsize =
+    std::sync::atomic::AtomicUsize::new(1);
 
 fn shared() -> std::sync::MutexGuard<'static, Vec<(usize, Shared)>> {
     SHARED.lock().unwrap_or_else(|e| e.into_inner())
@@ -411,7 +481,7 @@ impl Shared {
         let (table, data) = crate::host::host()?.upload_buffer(bytes)?;
         crate::host::name(&table, || "title memory page table".into());
         let null = heap.pair()?;
-        heap.raw_pair_at(null, None, 0);
+        heap.raw_pair_at(null, None, 0, 0);
         // SAFETY: a live buffer.
         let gpu = unsafe { table.GetGPUVirtualAddress() };
         Some(Shared {
@@ -434,34 +504,41 @@ impl Shared {
     fn rewrite(&mut self, heap: &HostHeap, now: u64) {
         let copies = crate::shadow::all();
         let live: HashSet<usize> = copies.iter().map(|c| Arc::as_ptr(c) as usize).collect();
-        self.pairs.retain(|copy, &mut slot| {
+        self.pairs.retain(|(copy, _), &mut slot| {
             let keep = live.contains(copy);
             if !keep {
-                heap.raw_pair_at(slot, None, 0);
+                heap.raw_pair_at(slot, None, 0, 0);
                 heap.free_pair(slot);
             }
             keep
         });
         let (mut named, mut slots) = (Vec::with_capacity(copies.len()), Vec::with_capacity(copies.len()));
+        let mut ranges: Vec<(u64, u64)> = Vec::with_capacity(copies.len());
         for c in copies {
             let key = Arc::as_ptr(&c) as usize;
-            let slot = match self.pairs.get(&key) {
-                Some(&slot) => slot,
-                None => {
-                    let Some(slot) = heap.pair() else {
-                        static ONCE: std::sync::Once = std::sync::Once::new();
-                        ONCE.call_once(|| tracing::warn!("no descriptor slots for a title memory copy's views: it reads as missing"));
-                        continue;
-                    };
-                    heap.raw_pair_at(slot, Some(&c.buffer), c.range().1.next_multiple_of(4));
-                    self.pairs.insert(key, slot);
-                    slot
-                }
-            };
-            named.push(c);
-            slots.push(slot);
+            // A copy longer than a view holds is named in pieces, each
+            // with views of its own from where it starts in the copy's
+            // buffer (which need not be the buffer's start: memory in
+            // place lies inside its heap's).
+            for (n, (start, len, viewed)) in pieces(c.range()).enumerate() {
+                let slot = match self.pairs.get(&(key, n as u32)) {
+                    Some(&slot) => slot,
+                    None => {
+                        let Some(slot) = heap.pair() else {
+                            static ONCE: std::sync::Once = std::sync::Once::new();
+                            ONCE.call_once(|| tracing::warn!("no descriptor slots for a title memory copy's views: it reads as missing"));
+                            continue;
+                        };
+                        heap.raw_pair_at(slot, Some(&c.buffer), c.offset(start), viewed.next_multiple_of(4));
+                        self.pairs.insert((key, n as u32), slot);
+                        slot
+                    }
+                };
+                named.push(c.clone());
+                slots.push(slot);
+                ranges.push((start, len));
+            }
         }
-        let ranges: Vec<(u64, u64)> = named.iter().map(|c| c.range()).collect();
         // The last table's blocks and owners, built back into if no list
         // still reads them (a reader clones the layout, under the lock
         // this holds); their buffers are kept between rewrites.
@@ -480,6 +557,7 @@ impl Shared {
             ONCE.call_once(|| tracing::warn!(CAPACITY, "title memory copies in more 256 MiB regions than a page table has room for: the rest read as missing"));
         }
         self.generation = now;
+        MAX_TABLE_BLOCKS.fetch_max(out.blocks.len(), std::sync::atomic::Ordering::Release);
         self.layout = Arc::new(Layout {
             bits: named.iter().map(|c| c.dirty_bit()).collect(),
             copies: named,
@@ -519,7 +597,12 @@ pub(crate) fn prepare(key: usize, mut add: impl FnMut(&Arc<Shadow>, usize, usize
     // Copies the title has not written since they took it are passed by
     // without touching them (the table names every copy, ~4,700 in the world).
     for l in layout.iter() {
+        let mut last = std::ptr::null();
         for (c, bit) in l.copies.iter().zip(&l.bits) {
+            // A copy named in pieces is there once per piece, in a row.
+            if std::mem::replace(&mut last, Arc::as_ptr(c)) == Arc::as_ptr(c) {
+                continue;
+            }
             if !c.clean() && !crate::watch::clean_bit(*bit) {
                 let (start, len) = c.range();
                 add(c, start as usize, len as usize);
@@ -528,10 +611,24 @@ pub(crate) fn prepare(key: usize, mut add: impl FnMut(&Arc<Shadow>, usize, usize
     }
 }
 
-/// Whether any marked page in `marks` fell outside a valid copy in `l`.
-fn has_missed(marks: &[u32], l: &Layout) -> bool {
-    for (w, &mark) in marks.iter().enumerate() {
-        let mut bits = mark;
+/// Number of 32-bit bitmap words covering block 0 (missing 256 MiB regions)
+/// plus active level-2 blocks up to `blocks`, capped at [`BITMAP_WORDS`].
+fn active_words_for(blocks: usize) -> usize {
+    blocks.max(1).saturating_mul(BLOCK / 32).min(BITMAP_WORDS)
+}
+
+/// Monotonic prefix of 32-bit bitmap words covering every block any page table
+/// has ever indexed. Shaders only index block numbers `< MAX_TABLE_BLOCKS`, so
+/// words past this prefix remain zero even if a table later shrinks or its heap
+/// is released.
+fn active_words() -> usize {
+    active_words_for(MAX_TABLE_BLOCKS.load(std::sync::atomic::Ordering::Acquire))
+}
+
+/// Scans `marks` for misses against `l`, returning `(has_missed, any_nonzero)`.
+fn scan_missed(marks: &[u32], l: &Layout) -> (bool, bool) {
+    let mut any_nonzero = false;
+    let check_word = |w: usize, mut bits: u32| -> bool {
         while bits != 0 {
             let entry = w * 32 + bits.trailing_zeros() as usize;
             bits &= bits - 1;
@@ -543,9 +640,42 @@ fn has_missed(marks: &[u32], l: &Layout) -> bool {
                 return true;
             }
         }
+        false
+    };
+    let (chunks, rem) = marks.as_chunks::<4>();
+    let rem_base = chunks.len() * 4;
+    for (chunk_idx, chunk) in chunks.iter().enumerate() {
+        if (chunk[0] | chunk[1] | chunk[2] | chunk[3]) == 0 {
+            continue;
+        }
+        any_nonzero = true;
+        for (off, &mark) in chunk.iter().enumerate() {
+            if mark != 0 && check_word(chunk_idx * 4 + off, mark) {
+                return (true, true);
+            }
+        }
     }
-    false
+    for (off, &mark) in rem.iter().enumerate() {
+        if mark != 0 {
+            any_nonzero = true;
+            if check_word(rem_base + off, mark) {
+                return (true, true);
+            }
+        }
+    }
+    (false, any_nonzero)
 }
+
+/// Whether any marked page in `marks` fell outside a valid copy in `l`.
+#[cfg(test)]
+fn has_missed(marks: &[u32], l: &Layout) -> bool {
+    scan_missed(marks, l).0
+}
+
+/// Handoff state between `defer_missed` and `defer_after` on a list's bitmap.
+const SCAN_UNKNOWN: u8 = 0;
+const SCAN_ALL_ZERO: u8 = 1;
+const SCAN_HAS_MARKS: u8 = 2;
 
 /// `list` uses title memory with view heap `key` bound: the heap's page
 /// table (made on first use) and a page bitmap of the list's, the table
@@ -574,48 +704,75 @@ pub(crate) fn bind(list: &HostList, key: usize) -> Option<Map> {
     let precise: Arc<Mutex<Vec<(u64, u64)>>> = Arc::default();
     let byte_for_byte = precise.clone();
     let missed_bitmap = Arc::clone(&pooled);
+    let scan_state = Arc::new(std::sync::atomic::AtomicU8::new(SCAN_UNKNOWN));
+    let missed_state = Arc::clone(&scan_state);
     list.defer_missed(move || {
         let l = layout(key);
-        // SAFETY: the bitmap is mapped and the list's run is over.
+        let words = active_words();
+        missed_bitmap.mark_dirty();
+        // SAFETY: the bitmap is mapped for `BITMAP_WORDS` dwords (`words <= BITMAP_WORDS`)
+        // and the list's run is over.
         let marks =
-            unsafe { std::slice::from_raw_parts(missed_bitmap.data() as *const u32, BITMAP_WORDS) };
-        has_missed(marks, &l)
+            unsafe { std::slice::from_raw_parts(missed_bitmap.data() as *const u32, words) };
+        let (missed, any_nonzero) = scan_missed(marks, &l);
+        missed_state.store(
+            if any_nonzero { SCAN_HAS_MARKS } else { SCAN_ALL_ZERO },
+            std::sync::atomic::Ordering::Release,
+        );
+        missed
     });
     list.defer_after(move || {
-        let Layout { copies, blocks, owner, .. } = &*layout(key);
+        // A miss in an earlier binding can short-circuit this check on the
+        // next execution. Only consume an all-zero result from this run.
+        if scan_state.swap(SCAN_UNKNOWN, std::sync::atomic::Ordering::AcqRel) == SCAN_ALL_ZERO {
+            pooled.mark_clean();
+            return;
+        }
+        let l = layout(key);
+        let words = active_words();
+        let Layout { copies, blocks, owner, .. } = &*l;
         let precise = byte_for_byte.lock().unwrap_or_else(|e| e.into_inner());
-        // SAFETY: the bitmap is mapped and the list's run is over.
+        // SAFETY: the bitmap is mapped for `BITMAP_WORDS` dwords (`words <= BITMAP_WORDS`)
+        // and the list's run is over.
         let marks =
-            unsafe { std::slice::from_raw_parts_mut(pooled.data() as *mut u32, BITMAP_WORDS) };
+            unsafe { std::slice::from_raw_parts_mut(pooled.data() as *mut u32, words) };
         let (mut pages, mut regions, mut missed) = (0, 0, Vec::new());
         let mut writes = Vec::new();
-        for (w, mark) in marks.iter_mut().enumerate() {
-            // Most words are 0: write back only the ones that are not.
-            if *mark == 0 {
+        debug_assert_eq!(words % 4, 0);
+        let (chunks, _) = marks.as_chunks_mut::<4>();
+        for (chunk_idx, chunk) in chunks.iter_mut().enumerate() {
+            if (chunk[0] | chunk[1] | chunk[2] | chunk[3]) == 0 {
                 continue;
             }
-            let mut bits = std::mem::take(mark);
-            while bits != 0 {
-                let entry = w * 32 + bits.trailing_zeros() as usize;
-                bits &= bits - 1;
-                let (block, page) = (entry / BLOCK, entry % BLOCK);
-                // Block 0's bits are 256 MiB regions with no block.
-                let Some(&l1) = blocks.get(block).filter(|_| block != 0) else {
-                    regions += 1;
-                    missed.push((entry as u64) << 28);
+            for (off, mark) in chunk.iter_mut().enumerate() {
+                if *mark == 0 {
                     continue;
-                };
-                let at = (l1 << 28 | page << 16) as u64;
-                match owner.get(entry) {
-                    Some(_) if precise.iter().any(|&(a, n)| a < at + (1 << 16) && at < a + n) => {}
-                    Some(&Some(k)) => writes.push((k, at)),
-                    _ => {
-                        pages += 1;
-                        missed.push(at);
+                }
+                let w = chunk_idx * 4 + off;
+                let mut bits = std::mem::take(mark);
+                while bits != 0 {
+                    let entry = w * 32 + bits.trailing_zeros() as usize;
+                    bits &= bits - 1;
+                    let (block, page) = (entry / BLOCK, entry % BLOCK);
+                    // Block 0's bits are 256 MiB regions with no block.
+                    let Some(&l1) = blocks.get(block).filter(|_| block != 0) else {
+                        regions += 1;
+                        missed.push((entry as u64) << 28);
+                        continue;
+                    };
+                    let at = (l1 << 28 | page << 16) as u64;
+                    match owner.get(entry) {
+                        Some(_) if precise.iter().any(|&(a, n)| a < at + (1 << 16) && at < a + n) => {}
+                        Some(&Some(k)) => writes.push((k, at)),
+                        _ => {
+                            pages += 1;
+                            missed.push(at);
+                        }
                     }
                 }
             }
         }
+        pooled.mark_clean();
         // What shaders computed from memory with no copy (read as zeros) is
         // not the console's: it does not go into title memory, where it broke
         // the title's own data (garbage pointers in title threads, run c1),
@@ -637,14 +794,16 @@ pub(crate) fn bind(list: &HostList, key: usize) -> Option<Map> {
             );
             written += 1;
         }
-        stats(|s| {
-            s.written += written;
-            s.withheld += withheld;
-            s.missed_pages += pages;
-            s.missed_regions += regions;
-            let room = 4usize.saturating_sub(s.first_missed.len());
-            s.first_missed.extend(missed.into_iter().take(room));
-        });
+        if written > 0 || withheld > 0 || pages > 0 || regions > 0 {
+            stats(|s| {
+                s.written += written;
+                s.withheld += withheld;
+                s.missed_pages += pages;
+                s.missed_regions += regions;
+                let room = 4usize.saturating_sub(s.first_missed.len());
+                s.first_missed.extend(missed.into_iter().take(room));
+            });
+        }
     });
     Some(Map {
         table,
@@ -785,6 +944,284 @@ mod tests {
         assert!(has_missed(&marks, &l));
     }
 
+    #[test]
+    fn active_words_scan_missed_and_clear_nonzero_words() {
+        assert_eq!(active_words_for(0), BLOCK / 32);
+        assert_eq!(active_words_for(1), BLOCK / 32);
+        assert_eq!(active_words_for(4), 4 * (BLOCK / 32));
+        assert_eq!(active_words_for(CAPACITY + 2), BITMAP_WORDS);
+
+        let mut owner = vec![None; 2 * BLOCK];
+        owner[BLOCK + 9] = Some(0);
+        let l = Layout {
+            blocks: vec![usize::MAX, 0],
+            owner,
+            ..Default::default()
+        };
+        let mut marks = vec![0u32; active_words_for(l.blocks.len())];
+        assert_eq!(scan_missed(&marks, &l), (false, false));
+        let owned = BLOCK + 9;
+        marks[owned / 32] = 1 << (owned % 32);
+        assert_eq!(scan_missed(&marks, &l), (false, true));
+        marks[0] = 1;
+        assert_eq!(scan_missed(&marks, &l), (true, true));
+
+        // Non-4-aligned slice tail clearing.
+        let mut tail = vec![0u32, 0, 0, 0, 0, 0x55, 0];
+        clear_nonzero_words(&mut tail);
+        assert!(tail.iter().all(|&w| w == 0));
+    }
+
+    /// Executing a bound title-memory list with no shader writes takes the
+    /// all-zero fast handoff and returns a clean bitmap to the pool; re-executing
+    /// a writing list without reset still processes new marks on each run.
+    #[test]
+    fn clean_handoff_and_repeat_submission_preserve_bitmap_state() {
+        let _guard = gpu_test_lock();
+        let (Some(host), Some(views)) = (crate::host::host(), heap()) else {
+            return;
+        };
+        let prev_missed = MISSED_IN.swap(MISS_NEVER, std::sync::atomic::Ordering::Relaxed);
+        let list = host.new_list().unwrap();
+        let _map = bind(&list, OURS).expect("bitmap for list");
+        list.close();
+        // Run with no GPU shader writes: defer_missed -> defer_after all-zero fast path.
+        host.execute(&[&list]);
+        list.reset();
+
+        // Next acquire reuses a zeroed bitmap.
+        let reused = Bitmap::acquire().unwrap();
+        // SAFETY: mapped for `BITMAP_WORDS` dwords.
+        let words = unsafe { std::slice::from_raw_parts(reused.data as *const u32, BITMAP_WORDS) };
+        assert!(words.iter().all(|&w| w == 0), "bitmap remains zeroed after fast-path drop");
+        drop(PooledBitmap::new(reused));
+
+        // Also execute a real writing shader twice on the same list without resetting it.
+        let Some((write_root, writer)) = pipeline(WRITE) else {
+            MISSED_IN.store(prev_missed, std::sync::atomic::Ordering::Relaxed);
+            return;
+        };
+        use crate::watch::PAGE;
+        let p = pool(1);
+        let at = p + 16;
+        // SAFETY: our pool.
+        unsafe { (at as *mut u32).write_volatile(0x10) };
+        crate::shadow::register(p, p as u64, PAGE as u64);
+        let copy = crate::shadow::find(p as u64, PAGE as u64).unwrap();
+        let map = bind(&list, OURS).expect("page table");
+        let constants = [at as u32, (at >> 32) as u32, 0x77, 0, 0];
+        // SAFETY: open list, live objects.
+        unsafe {
+            list.list.SetDescriptorHeaps(&[Some(views.heap.clone())]);
+            list.list.SetComputeRootSignature(&write_root);
+            list.list.SetComputeRootDescriptorTable(0, views.gpu(0));
+            list.list.SetComputeRootShaderResourceView(1, map.table);
+            list.list.SetComputeRootUnorderedAccessView(2, map.dirty);
+            list.list.SetComputeRoot32BitConstants(3, constants.len() as u32, constants.as_ptr().cast(), 0);
+            list.list.SetPipelineState(&writer);
+            list.list.Dispatch(1, 1, 1);
+        }
+        list.close();
+        // First execution writes 0x77 back to title memory and clears the bitmap.
+        host.execute(&[&list]);
+        // SAFETY: our pool.
+        assert_eq!(unsafe { (at as *const u32).read_volatile() }, 0x77);
+        // Overwrite title memory, then re-execute the SAME list without reset:
+        // defer_missed must still re-scan and defer_after must still copy 0x77 back.
+        // SAFETY: our pool.
+        unsafe { (at as *mut u32).write_volatile(0x22) };
+        host.execute(&[&list]);
+        // SAFETY: our pool.
+        assert_eq!(unsafe { (at as *const u32).read_volatile() }, 0x77);
+        list.reset();
+        MISSED_IN.store(prev_missed, std::sync::atomic::Ordering::Relaxed);
+        crate::shadow::unregister(p, p as u64);
+        drop(copy);
+        crate::watch::tests::free(p);
+    }
+
+    #[test]
+    fn repeated_list_clears_second_bitmap_when_first_heap_misses() {
+        use crate::compute::Param;
+        use crate::object::{S_OK, This, slot};
+        use windows::core::s;
+        let _guard = gpu_test_lock();
+        let (Some(host), Some(_)) = (crate::host::host(), heap()) else {
+            return;
+        };
+        let (root, writer) = crate::compute::pipeline(
+            r#"
+RWByteAddressBuffer first : register(u0);
+RWByteAddressBuffer second : register(u1);
+RWByteAddressBuffer result : register(u2);
+ByteAddressBuffer second_in : register(t0);
+[numthreads(1, 1, 1)]
+void main() {
+    uint previous = second_in.Load(0);
+    first.Store(0, 1);
+    second.Store(0, 2 + previous);
+    result.Store(0, previous);
+}
+"#,
+            s!("repeat_clear"),
+            0,
+            &[
+                Param::Uav { register: 0 },
+                Param::Uav { register: 1 },
+                Param::Uav { register: 2 },
+                Param::Srv { register: 0, space: 0 },
+            ],
+        )
+        .unwrap();
+        let prev_missed = MISSED_IN.swap(MISS_NEVER, std::sync::atomic::Ordering::Relaxed);
+        let desc = [0u32, 8, 1, 0, 0, 0, 0, 0]; // shader-visible view heap, no placement
+        let mut heap = std::ptr::null();
+        assert_eq!(
+            crate::descriptor::create_heap(
+                std::ptr::null(),
+                desc.as_ptr().cast(),
+                &crate::resource::PAGEABLE_IIDS[0],
+                &mut heap,
+            ),
+            S_OK
+        );
+        crate::descriptor::heap(heap).host().expect("host view heap");
+        let list = host.new_list().unwrap();
+        let first = bind(&list, OURS).unwrap();
+        let second = bind(&list, heap as usize).unwrap();
+        let (out, cpu) = host.shared_buffer(256).unwrap();
+        // SAFETY: open list and live root descriptors for all four parameters.
+        unsafe {
+            list.list.SetComputeRootSignature(&root);
+            list.list.SetComputeRootUnorderedAccessView(0, first.dirty);
+            list.list.SetComputeRootUnorderedAccessView(1, second.dirty);
+            list.list.SetComputeRootUnorderedAccessView(2, out.GetGPUVirtualAddress());
+            list.list.SetComputeRootShaderResourceView(3, second.dirty);
+            list.list.SetPipelineState(&writer);
+            list.list.Dispatch(1, 1, 1);
+        }
+        list.close();
+        let mut previous = [0; 3];
+        for word in &mut previous {
+            // SAFETY: the shared output is mapped, and execute waits for completion.
+            unsafe { cpu.cast::<u32>().write_volatile(u32::MAX) };
+            host.execute(&[&list]);
+            // SAFETY: the dispatch has completed.
+            *word = unsafe { cpu.cast::<u32>().read_volatile() };
+        }
+        list.reset();
+        MISSED_IN.store(prev_missed, std::sync::atomic::Ordering::Relaxed);
+        slot::<extern "system" fn(This) -> u32>(heap, 0x10)(heap);
+        assert_eq!(previous, [0; 3], "each submission must see a clean second bitmap");
+    }
+
+    /// Releasing a heap (shrinking `layout(key).blocks` to 0) after its table
+    /// was written and a shader marked a bit in block 1 must still scan past
+    /// block 0 (bounded by monotonic `MAX_TABLE_BLOCKS`), report the miss, and
+    /// clear the higher-block bit before `mark_clean` returns the bitmap to the
+    /// pool.
+    #[test]
+    fn heap_release_after_higher_block_write_still_clears_and_reports_miss() {
+        use crate::compute::Param;
+        use crate::object::{S_OK, This, slot};
+        use crate::watch::PAGE;
+        use windows::core::s;
+        let _guard = gpu_test_lock();
+        let (Some(host), Some(_)) = (crate::host::host(), heap()) else {
+            return;
+        };
+        let (root, writer) = crate::compute::pipeline(
+            r#"
+RWByteAddressBuffer dirty : register(u0);
+[numthreads(1, 1, 1)]
+void main() {
+    // Byte offset `(BLOCK / 32) * 4` = 128 * 4 = 512 is word 0 of block 1.
+    dirty.Store(512, 1);
+}
+"#,
+            s!("higher_block_mark"),
+            0,
+            &[Param::Uav { register: 0 }],
+        )
+        .unwrap();
+        let prev_missed = MISSED_IN.swap(MISS_NEVER, std::sync::atomic::Ordering::Relaxed);
+        let p = pool(1);
+        crate::shadow::register(p, p as u64, PAGE as u64);
+        let copy = crate::shadow::find(p as u64, PAGE as u64).unwrap();
+
+        let desc = [0u32, 8, 1, 0, 0, 0, 0, 0];
+        let mut h = std::ptr::null();
+        assert_eq!(
+            crate::descriptor::create_heap(
+                std::ptr::null(),
+                desc.as_ptr().cast(),
+                &crate::resource::PAGEABLE_IIDS[0],
+                &mut h,
+            ),
+            S_OK
+        );
+        crate::descriptor::heap(h).host().expect("host view heap");
+        let key = h as usize;
+
+        let list = host.new_list().unwrap();
+        // `bind` queues `Step::Memory(key)`, which rewrites the table with >= 2
+        // blocks and advances `MAX_TABLE_BLOCKS >= 2`.
+        let map = bind(&list, key).unwrap();
+        let dirty_va = map.dirty;
+        // Release the heap's table right after `Step::Memory(key)` runs, before
+        // the GPU runs and before `defer_missed` / `defer_after` read `layout(key)`.
+        list.defer_host(move || release(key));
+        // SAFETY: open list and live UAV buffer.
+        unsafe {
+            list.list.SetComputeRootSignature(&root);
+            list.list.SetComputeRootUnorderedAccessView(0, map.dirty);
+            list.list.SetPipelineState(&writer);
+            list.list.Dispatch(1, 1, 1);
+        }
+        list.close();
+        host.execute(&[&list]);
+        assert!(
+            !has_table(key),
+            "heap table was released before post-GPU scan"
+        );
+        assert!(
+            SUBMISSION_MISSED.load(std::sync::atomic::Ordering::Relaxed),
+            "mark in block 1 must be detected as missed even after layout shrunk to 0"
+        );
+        // Reset drops `PooledBitmap` with `clean == true`; verify the pooled
+        // bitmap actually has word `BLOCK / 32` (and all other words) cleared.
+        list.reset();
+        let mut acquired = Vec::new();
+        let mut found = false;
+        while let Some(b) = BITMAP_POOL.lock().unwrap_or_else(|e| e.into_inner()).pop() {
+            if b.gpu == dirty_va {
+                // SAFETY: `b.data` is mapped for `BITMAP_WORDS` dwords.
+                let words =
+                    unsafe { std::slice::from_raw_parts(b.data as *const u32, BITMAP_WORDS) };
+                assert_eq!(
+                    words[BLOCK / 32], 0,
+                    "higher-block mark must be cleared before returning bitmap to pool"
+                );
+                assert!(
+                    words.iter().all(|&w| w == 0),
+                    "returned bitmap must have no stray non-zero words"
+                );
+                found = true;
+            }
+            acquired.push(b);
+        }
+        for b in acquired {
+            drop(PooledBitmap::new(b));
+        }
+        assert!(found, "released list's bitmap was returned to BITMAP_POOL");
+
+        MISSED_IN.store(prev_missed, std::sync::atomic::Ordering::Relaxed);
+        slot::<extern "system" fn(This) -> u32>(h, 0x10)(h);
+        crate::shadow::unregister(p, p as u64);
+        drop(copy);
+        crate::watch::tests::free(p);
+    }
+
     fn gpu_test_lock() -> std::sync::MutexGuard<'static, ()> {
         static LOCK: Mutex<()> = Mutex::new(());
         LOCK.lock().unwrap_or_else(|e| e.into_inner())
@@ -917,7 +1354,7 @@ void main(uint3 id : SV_DispatchThreadID) {
             .find(|(k, _)| *k == key)?
             .1
             .pairs
-            .get(&(Arc::as_ptr(copy) as usize))
+            .get(&(Arc::as_ptr(copy) as usize, 0))
             .copied()
     }
 
@@ -1154,6 +1591,136 @@ void main() {
             assert_eq!(kept, 0x44, "a submission that missed nothing keeps its writes");
         }
         crate::shadow::unregister(p, p as u64);
+        drop(copy);
+    }
+
+    /// A title-memory program reads a copy longer than a raw view holds
+    /// (512 MiB, 2^27 elements) past its first 512 MiB as anywhere else:
+    /// the page table's entry for the address, and the view it names, give
+    /// the title's bytes there, not zeros. #322's aliased regions are this
+    /// long. Two programs: one reads the entry, the other reads through the
+    /// view it names, as translated shaders index `views[entry]`.
+    #[test]
+    fn a_long_copy_is_read_past_its_first_512_mib() {
+        use crate::compute::{Param, pipeline, srv};
+        use crate::watch::PAGE;
+        let _guard = gpu_test_lock();
+        let (Some(host), Some(views)) = (crate::host::host(), heap()) else {
+            return; // no host GPU here
+        };
+        const LOOKUP: &str = "cbuffer c : register(b0) { uint lo; uint hi; uint at; };\n\
+            ByteAddressBuffer table : register(t0, space2);\n\
+            RWByteAddressBuffer dst : register(u0);\n\
+            [numthreads(1, 1, 1)] void main() {\n\
+                bool inside = hi < 256;\n\
+                uint l1 = inside ? (hi << 4 | lo >> 28) : 0;\n\
+                uint block = inside ? table.Load(l1 * 4) : 0;\n\
+                uint entry = block << 12 | (lo >> 16 & 0xFFF);\n\
+                dst.Store2(at, table.Load2((4096 + 2 * entry) * 4));\n\
+            }\n";
+        const READ: &str = "cbuffer c : register(b0) { uint offset; uint at; };\n\
+            ByteAddressBuffer view : register(t0);\n\
+            RWByteAddressBuffer dst : register(u0);\n\
+            [numthreads(4, 1, 1)] void main(uint3 id : SV_DispatchThreadID) {\n\
+                dst.Store(at + id.x * 4, view.Load(offset + id.x * 4));\n\
+            }\n";
+        let lookup = pipeline(
+            LOOKUP,
+            windows::core::s!("page table entry"),
+            0,
+            &[
+                Param::Constants {
+                    register: 0,
+                    count: 3,
+                },
+                Param::Srv {
+                    register: 0,
+                    space: 2,
+                },
+                Param::Uav { register: 0 },
+            ],
+        );
+        let read = pipeline(
+            READ,
+            windows::core::s!("read a view"),
+            0,
+            &[
+                Param::Constants {
+                    register: 0,
+                    count: 2,
+                },
+                Param::Table(&[srv(0, 1)]),
+                Param::Uav { register: 0 },
+            ],
+        );
+        let (Ok((lookup_root, lookup_pso)), Ok((read_root, read_pso))) = (lookup, read) else {
+            return; // no compiler for the programs here
+        };
+        let (out, data) = host.shared_buffer(256).unwrap();
+        // SAFETY: a live buffer.
+        let out_gpu = unsafe { out.GetGPUVirtualAddress() };
+        // 600 MiB of title memory, a copy of all of it, and four words 520
+        // MiB in.
+        let bytes = 600 << 20;
+        let memory = pool(bytes / PAGE);
+        let at = memory + (520 << 20);
+        for k in 0..4 {
+            // SAFETY: our pool.
+            unsafe { (at as *mut u32).add(k).write_volatile(0x5150 + k as u32) };
+        }
+        crate::shadow::register(memory, memory as u64, bytes as u64);
+        let copy = crate::shadow::find(memory as u64, bytes as u64).expect("a copy");
+        // The page table's entry for that address, from a submission that
+        // binds it (which also brings the copy up to date).
+        let list = host.new_list().unwrap();
+        let map = bind(&list, OURS).expect("a page table");
+        let constants = [at as u32, (at >> 32) as u32, 0];
+        // SAFETY: an open list, live objects of ours.
+        unsafe {
+            list.list.SetComputeRootSignature(&lookup_root);
+            list.list
+                .SetComputeRoot32BitConstants(0, 3, constants.as_ptr().cast(), 0);
+            list.list.SetComputeRootShaderResourceView(1, map.table);
+            list.list.SetComputeRootUnorderedAccessView(2, out_gpu);
+            list.list.SetPipelineState(&lookup_pso);
+            list.list.Dispatch(1, 1, 1);
+        }
+        list.close();
+        host.execute(&[&list]);
+        // SAFETY: the mapped output, the GPU done with it.
+        let [slot, base] = unsafe {
+            [
+                data.cast::<u32>().read_volatile(),
+                data.cast::<u32>().add(1).read_volatile(),
+            ]
+        };
+        assert_ne!(slot, 0, "the address has an entry");
+        // Through the view that entry names, at the offset it gives.
+        let list = host.new_list().unwrap();
+        let constants = [(at as u32).wrapping_sub(base), 16];
+        // SAFETY: an open list, live objects of ours.
+        unsafe {
+            list.list.SetDescriptorHeaps(&[Some(views.heap.clone())]);
+            list.list.SetComputeRootSignature(&read_root);
+            list.list
+                .SetComputeRoot32BitConstants(0, 2, constants.as_ptr().cast(), 0);
+            list.list.SetComputeRootDescriptorTable(1, views.gpu(slot));
+            list.list.SetComputeRootUnorderedAccessView(2, out_gpu);
+            list.list.SetPipelineState(&read_pso);
+            list.list.Dispatch(1, 1, 1);
+        }
+        list.close();
+        host.execute(&[&list]);
+        // SAFETY: as above.
+        let words: Vec<u32> = (0..4)
+            .map(|k| unsafe { data.cast::<u32>().add(4 + k).read_volatile() })
+            .collect();
+        assert_eq!(
+            words,
+            [0x5150, 0x5151, 0x5152, 0x5153],
+            "the title's words 520 MiB into the copy"
+        );
+        crate::shadow::unregister(memory, memory as u64);
         drop(copy);
     }
 
