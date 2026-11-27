@@ -2,7 +2,7 @@
 # Launch an Xbox Series game build through VIctory on macOS.
 #
 # First-time setup is separate: run ./setup.sh once from the repository root.
-# Then run ./run-gta6.sh and paste the full path to game_scarlett_master.exe.
+# Then run ./Launch.sh and paste the full path to game_scarlett_master.exe.
 # The selected path is used only by this local process and is not saved.
 
 set -eu
