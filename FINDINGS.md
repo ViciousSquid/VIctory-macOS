@@ -1,7 +1,6 @@
 # VIctory macOS — investigation findings
 
 **Date:** 2026-11-27 (UTC)  
-**Title/build:** Grand Theft Auto VI, Series 1.0.2.1  
 **Executable SHA-256:** `b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93`  
 **Tested source revision:** `87917243b0560571e9ff8ab39479031cc5e4b70c` (`8791724`)  
 **Observed log:** `/tmp/victory-warm.log`, approximately 23:30–23:31 UTC  
@@ -11,7 +10,7 @@ This is an investigation record, not a claim that the game is fully playable or 
 
 ## Executive summary
 
-The run gets substantially into GTA VI startup and world rendering. Victory creates and uses D3D12 host pipelines, translates shaders, processes DirectStorage reads, and submits GPU work. The supplied log also contains host mesh-pipeline creation and frame reports. The user-visible window remained black while game audio was audible.
+The run gets substantially into the game startup and world rendering. Victory creates and uses D3D12 host pipelines, translates shaders, processes DirectStorage reads, and submits GPU work. The supplied log also contains host mesh-pipeline creation and frame reports. The user-visible window remained black while game audio was audible.
 
 The world-stage reports show a severe performance collapse: approximately **0.2 FPS** and then **0.1 FPS**, with frame times of **4.38 s** and **7.95 s**. Host preparation is dominated by title-memory copies and texture preparation. The two reports account for approximately **27.0 GB** and **28.1 GB** of title-memory copy traffic per reported frame, plus approximately **4.8 GB** and **7.4 GB** of texture-preparation traffic.
 
