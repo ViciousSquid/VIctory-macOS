@@ -6,7 +6,7 @@
 **Observed log:** `/tmp/victory-warm.log`, approximately 23:30–23:31 UTC  
 **Purpose:** Record the observed macOS/Rosetta run, correlate it with the implementation, and distinguish confirmed causes from open questions.
 
-This is an investigation record, not a claim that the game is fully playable or that the current rendering path is stable.
+INVESTIGATION RECORD:  Apple M5 Air 2026 | 24GB unified RAM 
 
 ## Executive summary
 
