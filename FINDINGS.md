@@ -309,10 +309,10 @@ The two 64-bit words are little-endian instruction bytes. They decode as two con
 vmovups [rax+0x320], ymm0
 
 ; second instruction, eight bytes later
-vmovups [rax+0x334], ymm0
+vmovups [rax+0x340], ymm0
 ```
 
-The second store therefore begins at `x86_rip + 8`.
+The second store therefore begins at `x86_rip + 8`. Its encoded disp32 is `0x340` (not `0x334`); the first store's disp32 is `0x320`.
 
 The last confirmed main-image base was `0x6fffed550000`. **If the current run reports the same base**, the arithmetic is:
 
@@ -324,17 +324,15 @@ That is a provisional main-image RVA of `0xDD821A`; the second store is at `0xDD
 
 **Correction to the earlier conversational diagnosis:** the statement that `0x6fffee32821a` was above the main executable's mapped range was based on an incorrect subtraction. The correct difference from `0x6fffed550000` is `0xDD821A`, not `0x8DD821A`. Confirm the `mapped at` line from this same run before relying on the provisional RVA, because the base must come from the process that produced the exception.
 
-The startup patch count for this latest run has not yet been supplied. If it retained the three previous extra sites (`0x22f7e6`, `0x22f7ed`, `0x22f7f4`), the expected count before adding these two new sites is **1,245**. Adding `0xDD821A` and `0xDD8222` to the same explicit `VICTORY_PATCH_MASKED` list would then make the expected count **1,247**, assuming both instructions are accepted and patched.
+The user subsequently supplied the startup excerpt from `/tmp/victory-rva-test-2.log`. It confirms `fault tracking on`, mapped base `0x6fffed550000`, and `masked stores 1245 patched to plain stores`. This verifies the three earlier extra sites (`0x22f7e6`, `0x22f7ed`, `0x22f7f4`) were included in the patch set. With this confirmed base, the current exception is inside the main executable image at RVA **`0xDD821A`**; the second store is at **`0xDD8222`**. Adding both to the same explicit `VICTORY_PATCH_MASKED` list should produce **1,247 patched stores**, assuming both decode and patch successfully.
 
 This instruction sequence is consistent with another pair of unaligned 256-bit stores that Rosetta may be unable to resume when they fault across protected pages. The log alone does not establish that either instruction actually crossed a protected-page boundary; the next patch run is a controlled test of that hypothesis.
 
 #### Immediate follow-up
 
-1. Check the latest run's own startup identity and patch count:
-   `grep -E 'fault tracking|mapped at|masked stores|title dll|wide stores' /tmp/victory-rva-test-2.log`
-2. If its mapped base is still `0x6fffed550000`, add RVAs `dd821a` and `dd8222` to the explicit `VICTORY_PATCH_MASKED` list, retaining `all`, the eight original build-specific RVAs, and the three previously identified sites.
-3. If the base differs, recalculate both RVAs from that run's `mapped at` address before patching.
-4. Preserve the full next log and check the startup patch count and any patch warnings before interpreting the next exception.
+1. The latest startup output is now confirmed: `fault tracking on`, mapped base `0x6fffed550000`, and **1,245 patched stores**. This includes the three previously identified extra sites.
+2. Add RVAs `dd821a` and `dd8222` to the explicit `VICTORY_PATCH_MASKED` list, retaining `all`, the eight original build-specific RVAs, and the three previously identified sites. The expected count is **1,247**.
+3. Preserve the full next log and check the startup patch count and any patch warnings before interpreting the next exception.
 
 ## 7. Current interpretation
 
@@ -350,7 +348,8 @@ This instruction sequence is consistent with another pair of unaligned 256-bit s
 8. The 2026-11-27 baseline Rosetta exception was below the main image base and remained unattributed.
 9. A 2026-11-28 tracking-enabled run confirmed fault tracking on, a mapped base of `0x6fffed550000`, and 1,242 patched stores; it then faulted at main-image RVA `0x22f7e6` on a `vmovups [r12+0x60], ymm0` instruction.
 10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup output confirmed `fault tracking on` and 1,244 patched stores, verifying that the two preceding sites were added to the patch set.
-11. A later exception was reported at `0x6fffee32821a`, with bytes decoding to two consecutive 256-bit `vmovups` stores. Relative to the last confirmed main-image base `0x6fffed550000`, the provisional RVAs are `0xDD821A` and `0xDD8222`; the current run's own base and patch count still need confirmation.
+11. The next run's startup excerpt confirms `fault tracking on`, mapped base `0x6fffed550000`, and 1,245 patched stores. Its exception at `0x6fffee32821a` is therefore at confirmed main-image RVA `0xDD821A`; the supplied bytes also identify a second candidate store at RVA `0xDD8222`.
+11. A later exception was reported at `0x6fffee32821a`, with bytes decoding to two consecutive 256-bit `vmovups` stores. The same run's startup excerpt confirms the main-image base `0x6fffed550000` and 1,245 stores patched, giving confirmed main-image RVAs `0xDD821A` and `0xDD8222` for the two candidate sites.
 
 ### Strong performance lead
 
@@ -363,7 +362,7 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 - Which exact shader hashes account for the largest visually significant missing passes.
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
 - Whether adding RVA `0x22f7f4` will allow that first store sequence to complete without another Rosetta exception.
-- Whether the latest run used the same main-image base and whether the two newly decoded stores at provisional RVAs `0xDD821A` and `0xDD8222` are inside that image's executable section.
+- Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let this part of the title proceed without another Rosetta exception.
 - Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
 
 ## 8. Recommended next experiments
