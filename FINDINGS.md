@@ -5,7 +5,7 @@
 **Game build:** Series 1.0.2.1  
 **Game executable SHA-256:** \`b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93\`  
 **Investigation source revision:** \`87917243b0560571e9ff8ab39479031cc5e4b70c\` (\`8791724\`)  
-**Upstream contribution:** [PR #656 — Add generated Rosetta wide-store patch-site manifests](https://github.com/pragyaangaur/VIctory-macOS/pull/656)
+
 
 ## Current result
 
