@@ -6,7 +6,8 @@
 **Game executable SHA-256:** \`b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93\`  
 **Investigation source revision:** \`87917243b0560571e9ff8ab39479031cc5e4b70c\` (\`8791724\`)  
 
-branch: https://github.com/ViciousSquid/VIctory-macOS/tree/patch/runtime-patch-data works at 4FPS on Macbook Air M5 (use `Launch.sh` and select the EXE)
+branch: https://github.com/ViciousSquid/VIctory-macOS/tree/patch/runtime-patch-data works at 4FPS on Macbook Air M5 
+(use `Launch.sh` and select the EXE)
 
 
 ## Current result
