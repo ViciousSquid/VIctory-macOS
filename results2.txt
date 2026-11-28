@@ -1,0 +1,476 @@
+*** Sampled system activity (Sat Nov 28 04:07:50 2026 +0000) (1010.96ms elapsed) ***
+MTLCompilerService                 48700  2130.34   99.68  0.00    0.00               0.00    0.00              5379.75         
+wine                               48560  2263.81   95.34  833.82  0.00               1423.32 0.00              3999.35         
+MTLCompilerService                 48695  703.16    99.62  0.00    0.00               0.00    0.00              1769.02         
+ReportCrash                        724    997.73    99.75  0.00    0.00               0.00    0.00              953.10          
+wine                               48675  9.50      53.97  811.07  0.00               812.06  0.00              4.91            
+wine                               48677  2.50      42.44  0.00    0.00               0.00    0.00              2.62            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  16% 3048 MHz:  84%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13779 mW
+GPU Power: 14 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.25% (338 MHz: 2.2% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.75%
+GPU Power: 14 mW
+*** Sampled system activity (Sat Nov 28 04:07:51 2026 +0000) (1017.73ms elapsed) ***
+MTLCompilerService                 48700  2478.79   99.51  0.00    0.00               0.00    0.00              5821.94         
+wine                               48560  1773.28   95.83  838.20  0.00               1424.84 0.00              3460.28         
+MTLCompilerService                 48695  852.39    99.63  0.00    0.00               0.00    0.00              1994.21         
+ReportCrash                        724    1000.82   99.68  0.00    0.00               0.00    0.00              956.89          
+wine                               48675  9.59      54.47  807.74  0.00               807.74  0.00              5.01            
+wine                               48677  2.59      42.45  0.00    0.00               0.00    0.00              2.42            
+wine                               48679  0.30      58.27  0.98    0.00               0.98    0.00              0.36            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  17% 3048 MHz:  83%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  87% 3300 MHz:  13% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13775 mW
+GPU Power: 13 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.17% (338 MHz: 2.2% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.83%
+GPU Power: 13 mW
+*** Sampled system activity (Sat Nov 28 04:07:52 2026 +0000) (1012.04ms elapsed) ***
+MTLCompilerService                 48700  3200.96   99.51  0.00    0.00               0.00    0.00              7341.92         
+wine                               48560  1080.87   94.31  842.86  0.00               1428.81 0.00              2071.27         
+MTLCompilerService                 48695  809.06    99.64  0.00    0.00               0.00    0.00              1876.13         
+ReportCrash                        724    997.92    99.78  0.00    0.00               0.00    0.00              951.07          
+wine                               48675  9.10      53.16  805.31  0.00               805.31  0.00              4.65            
+wine                               48677  2.02      42.31  0.00    0.00               0.00    0.00              1.94            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  15% 3048 MHz:  85%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  80% 3300 MHz:  20% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13822 mW
+GPU Power: 10 mW
+**** Thermal pressure ****
+GPU HW active residency:   1.92% (338 MHz: 1.9% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  98.08%
+GPU Power: 10 mW
+*** Sampled system activity (Sat Nov 28 04:07:53 2026 +0000) (1012.09ms elapsed) ***
+MTLCompilerService                 48700  2745.46   99.58  0.00    0.00               0.00    0.00              6423.90         
+wine                               48560  1738.64   94.51  842.74  0.00               1427.63 0.00              3240.03         
+MTLCompilerService                 48695  619.52    99.30  0.00    0.00               0.00    0.00              1510.91         
+ReportCrash                        724    1001.37   99.77  0.00    0.00               0.00    0.00              956.49          
+wine                               48675  9.58      54.17  807.18  0.00               807.18  0.00              4.84            
+wine                               48677  1.99      40.65  0.00    0.00               0.00    0.00              2.16            
+wine                               48679  0.31      64.54  0.99    0.00               0.99    0.00              0.14            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  18% 3048 MHz:  82%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  84% 3300 MHz:  16% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13816 mW
+GPU Power: 12 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.07% (338 MHz: 2.1% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.93%
+GPU Power: 12 mW
+*** Sampled system activity (Sat Nov 28 04:07:54 2026 +0000) (1012.32ms elapsed) ***
+MTLCompilerService                 48700  2092.66   99.64  0.00    0.00               0.00    0.00              4931.54         
+wine                               48560  2358.18   84.23  833.70  0.00               1419.46 0.00              4128.88         
+MTLCompilerService                 48695  926.70    99.69  0.00    0.00               0.00    0.00              2177.73         
+ReportCrash                        724    997.22    99.63  0.00    0.00               0.00    0.00              955.35          
+wine                               48675  9.99      54.28  809.00  0.00               809.99  0.00              5.01            
+wine                               48677  2.28      41.92  0.00    0.00               0.00    0.00              2.28            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  23% 3048 MHz:  77%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  72% 3300 MHz:  28% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13825 mW
+GPU Power: 41 mW
+**** Thermal pressure ****
+GPU HW active residency:   8.98% (338 MHz: 2.6% 486 MHz: 1.1% 636 MHz: 5.2% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  91.02%
+GPU Power: 43 mW
+*** Sampled system activity (Sat Nov 28 04:07:55 2026 +0000) (1011.52ms elapsed) ***
+wine                               48560  4698.75   80.94  1837.02 24.72              2421.34 0.00              7463.01         
+MTLCompilerService                 48700  1580.58   98.81  0.00    0.00               0.00    0.00              3104.37         
+MTLCompilerService                 48695  768.41    98.50  0.00    0.00               0.00    0.00              1506.93         
+ReportCrash                        724    811.74    96.49  0.00    0.00               0.00    0.00              763.35          
+wine                               48675  11.01     57.09  767.24  0.00               767.24  0.00              9.11            
+wine                               48677  3.98      42.00  0.00    0.00               0.00    0.00              5.48            
+wine                               48679  0.36      66.64  0.99    0.00               0.99    0.00              0.22            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  69% 3048 MHz:  31%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  19% 3300 MHz:  74% 3516 MHz: 6.4% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 14993 mW
+GPU Power: 122 mW
+**** Thermal pressure ****
+GPU HW active residency:   8.94% (338 MHz: 2.1% 486 MHz: 2.7% 636 MHz: 4.1% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  91.06%
+GPU Power: 120 mW
+*** Sampled system activity (Sat Nov 28 04:07:56 2026 +0000) (1012.45ms elapsed) ***
+MTLCompilerService                 48700  2826.57   99.31  0.00    0.00               0.00    0.00              6229.61         
+wine                               48560  1666.50   87.85  842.51  0.00               1491.43 0.00              2839.30         
+MTLCompilerService                 48695  947.94    99.10  0.99    0.00               0.99    0.00              2079.86         
+ReportCrash                        724    981.80    99.06  0.00    0.00               0.00    0.00              934.43          
+wine                               48675  11.56     56.16  805.96  0.00               805.96  0.00              5.83            
+wine                               48677  2.33      41.35  0.00    0.00               0.00    0.00              1.98            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  37% 3048 MHz:  63%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 1.5% 3072 MHz:  70% 3300 MHz:  28% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13993 mW
+GPU Power: 126 mW
+**** Thermal pressure ****
+GPU HW active residency:  10.16% (338 MHz: 2.6% 486 MHz: .24% 636 MHz: 5.2% 796 MHz: 2.2% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  89.84%
+GPU Power: 129 mW
+*** Sampled system activity (Sat Nov 28 04:07:57 2026 +0000) (1012.07ms elapsed) ***
+wine                               48560  4297.02   74.71  2071.87 7.90               2709.14 0.00              6246.34         
+MTLCompilerService                 48700  2295.86   98.54  0.00    0.00               0.00    0.00              4160.81         
+MTLCompilerService                 48695  481.74    97.71  0.00    0.00               0.00    0.00              916.15          
+ReportCrash                        724    781.34    93.97  0.00    0.00               0.00    0.00              723.80          
+wine                               48675  12.05     56.72  752.87  0.00               752.87  0.00              9.46            
+wine                               48677  3.63      40.77  0.00    0.00               0.00    0.00              3.66            
+wine                               48679  1.85      19.86  0.99    0.00               0.99    0.00              2.28            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  80% 3048 MHz:  20%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  69% 3300 MHz:  31% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 14371 mW
+GPU Power: 192 mW
+**** Thermal pressure ****
+GPU HW active residency:   8.01% (338 MHz: 2.5% 486 MHz: .14% 636 MHz: .65% 796 MHz: .09% 888 MHz: .03% 988 MHz: 2.3% 1084 MHz: 1.9% 1182 MHz: .09% 1278 MHz: .04% 1374 MHz: .04% 1470 MHz: .13% 1578 MHz: .25%)
+GPU idle residency:  91.99%
+GPU Power: 190 mW
+*** Sampled system activity (Sat Nov 28 04:07:58 2026 +0000) (1012.65ms elapsed) ***
+wine                               48560  4083.28   80.31  1656.05 13.83              2273.24 0.00              5436.66         
+MTLCompilerService                 48700  2054.09   98.37  0.00    0.00               0.00    0.00              3464.66         
+MTLCompilerService                 48695  767.85    98.27  0.00    0.00               0.00    0.00              1285.78         
+ReportCrash                        724    844.03    97.23  0.00    0.00               0.00    0.00              793.88          
+wine                               48675  12.43     57.47  765.32  0.00               765.32  0.00              8.33            
+wine                               48677  2.77      41.28  0.00    0.00               0.00    0.00              2.64            
+wine                               48679  0.15      26.00  0.00    0.00               0.00    0.00              0.13            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  74% 3048 MHz:  26%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  61% 3072 MHz:  39% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 12987 mW
+GPU Power: 210 mW
+**** Thermal pressure ****
+GPU HW active residency:  14.70% (338 MHz: 1.3% 486 MHz: 5.2% 636 MHz: 8.2% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  85.30%
+GPU Power: 210 mW
+*** Sampled system activity (Sat Nov 28 04:07:59 2026 +0000) (1011.56ms elapsed) ***
+wine                               48560  4662.30   82.18  1292.99 34.60              1838.65 0.00              6268.53         
+MTLCompilerService                 48700  2176.75   98.55  0.00    0.00               0.00    0.00              3094.03         
+MTLCompilerService                 48695  493.86    98.50  0.00    0.00               0.00    0.00              788.93          
+ReportCrash                        724    765.38    95.44  0.00    0.00               0.00    0.00              714.04          
+wine                               48675  12.46     56.94  738.43  0.00               739.41  0.00              8.98            
+wine                               48677  3.97      40.49  0.00    0.00               0.00    0.00              3.78            
+wine                               48679  0.39      54.37  0.99    0.00               0.99    0.00              0.48            
+[48700]MTLCompilerService              	<calculating>
+[48695]MTLCompilerService              	<calculating>
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  85% 3048 MHz:  15%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  72% 3072 MHz:  28% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13040 mW
+GPU Power: 235 mW
+**** Thermal pressure ****
+GPU HW active residency:  15.87% (338 MHz: 2.9% 486 MHz: 3.5% 636 MHz: 7.3% 796 MHz: 2.1% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  84.13%
+GPU Power: 235 mW
+*** Sampled system activity (Sat Nov 28 04:08:00 2026 +0000) (1015.04ms elapsed) ***
+MTLCompilerService                 48700  2703.41   98.59  0.00    0.00               0.00    0.00              4857.39         
+wine                               48560  2564.07   78.13  1033.43 1.97               1687.58 0.00              3750.50         
+MTLCompilerService                 48695  841.97    98.45  0.00    0.00               0.00    0.00              1639.90         
+ReportCrash                        724    907.48    97.43  0.00    0.00               0.00    0.00              850.56          
+wine                               48675  12.58     57.79  797.98  0.00               797.98  0.00              7.55            
+wine                               48677  2.94      41.15  0.00    0.00               0.00    0.00              2.78            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  61% 3048 MHz:  39%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  24% 3072 MHz:  76% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13229 mW
+GPU Power: 211 mW
+**** Thermal pressure ****
+GPU HW active residency:  14.12% (338 MHz: 2.6% 486 MHz: .50% 636 MHz:  10% 796 MHz: .79% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  85.88%
+GPU Power: 211 mW
+*** Sampled system activity (Sat Nov 28 04:08:01 2026 +0000) (1012.56ms elapsed) ***
+MTLCompilerService                 48700  2211.11   99.38  0.00    0.00               0.00    0.00              5088.78         
+wine                               48560  2274.80   90.61  855.37  0.00               1500.35 0.00              3802.72         
+MTLCompilerService                 48695  721.49    99.29  0.00    0.00               0.00    0.00              1752.97         
+ReportCrash                        724    987.07    99.37  0.00    0.00               0.00    0.00              941.14          
+wine                               48675  10.75     55.08  807.95  0.00               807.95  0.00              5.64            
+wine                               48677  4.56      38.94  0.00    0.00               0.00    0.00              4.07            
+wine                               48679  1.61      20.15  0.99    0.00               0.99    0.00              1.78            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  26% 3048 MHz:  74%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  94% 3300 MHz: 6.3% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13330 mW
+GPU Power: 92 mW
+**** Thermal pressure ****
+GPU HW active residency:   6.22% (338 MHz: 2.3% 486 MHz: .06% 636 MHz: .63% 796 MHz: .06% 888 MHz: .05% 988 MHz: 1.1% 1084 MHz: 1.6% 1182 MHz: .02% 1278 MHz: .04% 1374 MHz: .07% 1470 MHz: .10% 1578 MHz: .12%)
+GPU idle residency:  93.78%
+GPU Power: 92 mW
+*** Sampled system activity (Sat Nov 28 04:08:02 2026 +0000) (1011.34ms elapsed) ***
+MTLCompilerService                 48700  2016.93   99.64  0.00    0.00               0.00    0.00              5123.66         
+wine                               48560  2111.70   95.35  843.45  0.00               1424.87 0.00              3633.34         
+MTLCompilerService                 48695  946.30    99.57  0.00    0.00               0.00    0.00              2526.28         
+ReportCrash                        724    999.02    99.77  0.00    0.00               0.00    0.00              951.90          
+wine                               48675  9.16      53.35  810.82  0.00               810.82  0.00              4.67            
+wine                               48677  1.49      42.23  0.00    0.00               0.00    0.00              1.53            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  16% 3048 MHz:  84%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  45% 3300 MHz:  55% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13856 mW
+GPU Power: 13 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.41% (338 MHz: 2.4% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.59%
+GPU Power: 13 mW
+*** Sampled system activity (Sat Nov 28 04:08:03 2026 +0000) (1011.99ms elapsed) ***
+MTLCompilerService                 48700  2207.68   99.56  0.00    0.00               0.00    0.00              5390.53         
+wine                               48560  2025.40   94.71  836.99  0.00               1421.99 0.00              3654.54         
+MTLCompilerService                 48695  822.96    99.57  0.00    0.00               0.00    0.00              1970.89         
+ReportCrash                        724    995.72    99.76  0.00    0.00               0.00    0.00              955.65          
+wine                               48675  9.69      53.77  807.34  0.00               807.34  0.00              5.11            
+wine                               48677  1.49      42.17  0.00    0.00               0.00    0.00              1.47            
+wine                               48679  0.38      53.50  0.99    0.00               0.99    0.00              0.34            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  18% 3048 MHz:  82%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  57% 3300 MHz:  43% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13828 mW
+GPU Power: 12 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.26% (338 MHz: 2.3% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.74%
+GPU Power: 12 mW
+*** Sampled system activity (Sat Nov 28 04:08:04 2026 +0000) (1011.87ms elapsed) ***
+MTLCompilerService                 48700  2372.43   99.63  0.00    0.00               0.00    0.00              5810.97         
+wine                               48560  1886.17   94.75  850.85  0.00               1432.90 0.00              3495.40         
+MTLCompilerService                 48695  803.57    99.47  0.00    0.00               0.00    0.00              1939.78         
+ReportCrash                        724    999.93    99.76  0.00    0.00               0.00    0.00              954.27          
+wine                               48675  9.57      52.24  808.35  0.00               809.34  0.00              4.94            
+wine                               48677  2.31      42.61  0.00    0.00               0.00    0.00              2.31            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  15% 3048 MHz:  85%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  84% 3300 MHz:  16% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13768 mW
+GPU Power: 11 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.08% (338 MHz: 2.1% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.92%
+GPU Power: 11 mW
+*** Sampled system activity (Sat Nov 28 04:08:05 2026 +0000) (1011.84ms elapsed) ***
+MTLCompilerService                 48700  2919.72   99.61  0.00    0.00               0.00    0.00              6525.76         
+MTLCompilerService                 48695  995.53    99.04  0.00    0.00               0.00    0.00              2190.13         
+wine                               48560  1153.92   94.38  841.03  0.00               1423.12 0.00              2188.04         
+ReportCrash                        724    997.46    99.77  0.00    0.00               0.00    0.00              954.64          
+wine                               48675  9.61      54.19  806.44  0.00               806.44  0.00              4.89            
+wine                               48677  1.87      44.22  0.00    0.00               0.00    0.00              1.46            
+wine                               48679  0.30      65.39  0.99    0.00               0.99    0.00              0.13            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  16% 3048 MHz:  84%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 4.0% 3072 MHz:  96% 3300 MHz: .08% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13482 mW
+GPU Power: 14 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.28% (338 MHz: 2.3% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.72%
+GPU Power: 14 mW
+*** Sampled system activity (Sat Nov 28 04:08:06 2026 +0000) (1011.78ms elapsed) ***
+MTLCompilerService                 48700  2768.90   99.51  0.00    0.00               0.00    0.00              6223.21         
+wine                               48560  1739.37   81.35  901.27  0.00               1487.30 0.00              3025.17         
+MTLCompilerService                 48695  814.58    98.54  0.00    0.00               0.00    0.00              1737.47         
+ReportCrash                        724    1000.72   99.67  0.00    0.00               0.00    0.00              955.11          
+wine                               48675  10.10     54.58  809.37  0.00               809.37  0.00              5.05            
+wine                               48677  2.55      42.30  0.00    0.00               0.00    0.00              2.35            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  25% 3048 MHz:  75%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 2.5% 3072 MHz:  94% 3300 MHz: 3.5% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13662 mW
+GPU Power: 45 mW
+**** Thermal pressure ****
+GPU HW active residency:  12.02% (338 MHz:  12% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  87.98%
+GPU Power: 46 mW
+*** Sampled system activity (Sat Nov 28 04:08:07 2026 +0000) (1013.21ms elapsed) ***
+wine                               48560  3286.84   75.89  2223.90 44.42              2925.72 0.00              4608.86         
+MTLCompilerService                 48700  2830.73   98.66  0.00    0.00               0.00    0.00              4268.45         
+MTLCompilerService                 48695  744.78    98.54  0.00    0.00               0.00    0.00              1181.21         
+ReportCrash                        724    843.38    96.83  0.00    0.00               0.00    0.00              788.37          
+wine                               48675  11.73     57.54  724.52  0.00               724.52  0.00              7.84            
+wine                               48677  7.32      39.25  0.00    0.00               0.00    0.00              7.50            
+wine                               48679  0.39      56.77  0.99    0.00               0.99    0.00              0.51            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  79% 3048 MHz:  21%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  54% 3072 MHz:  46% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 12965 mW
+GPU Power: 266 mW
+**** Thermal pressure ****
+GPU HW active residency:  15.35% (338 MHz: 5.9% 486 MHz: .93% 636 MHz: 4.4% 796 MHz: .17% 888 MHz: .03% 988 MHz: .98% 1084 MHz: 2.4% 1182 MHz: .05% 1278 MHz: .04% 1374 MHz: .05% 1470 MHz: .07% 1578 MHz: .30%)
+GPU idle residency:  84.65%
+GPU Power: 265 mW
+*** Sampled system activity (Sat Nov 28 04:08:08 2026 +0000) (1012.45ms elapsed) ***
+wine                               48560  3489.15   75.01  1496.83 8.89               2245.24 0.00              4683.01         
+MTLCompilerService                 48700  2505.65   98.72  0.00    0.00               0.00    0.00              4262.84         
+MTLCompilerService                 48695  679.64    98.74  0.00    0.00               0.00    0.00              1138.76         
+ReportCrash                        724    813.31    94.40  0.00    0.00               0.00    0.00              751.24          
+wine                               48675  12.68     58.59  777.05  0.00               777.05  0.00              8.74            
+wine                               48677  4.82      37.74  0.00    0.00               0.00    0.00              4.31            
+wine                               48679  0.06      53.48  0.00    0.00               0.00    0.00              0.02            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  68% 3048 MHz:  32%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  32% 3072 MHz:  68% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13028 mW
+GPU Power: 192 mW
+**** Thermal pressure ****
+GPU HW active residency:  14.53% (338 MHz: 5.3% 486 MHz: 5.4% 636 MHz: 3.9% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  85.47%
+GPU Power: 196 mW
+*** Sampled system activity (Sat Nov 28 04:08:09 2026 +0000) (1012.83ms elapsed) ***
+MTLCompilerService                 48700  2918.45   99.16  0.00    0.00               0.00    0.00              5537.23         
+wine                               48560  2172.35   80.78  1537.85 3.95               2298.38 0.00              3304.12         
+MTLCompilerService                 48695  725.36    99.28  0.00    0.00               0.00    0.00              1462.06         
+ReportCrash                        724    943.76    97.91  0.00    0.00               0.00    0.00              889.34          
+wine                               48675  11.76     57.28  798.06  0.00               798.06  0.00              6.63            
+wine                               48677  3.45      41.15  0.00    0.00               0.00    0.00              3.28            
+wine                               48679  0.33      58.70  0.99    0.00               0.99    0.00              0.15            
+[48700]MTLCompilerService              	   3827.32	<calculating>
+[48695]MTLCompilerService              	   1228.19	<calculating>
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  51% 3048 MHz:  49%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  34% 3072 MHz:  66% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13143 mW
+GPU Power: 102 mW
+**** Thermal pressure ****
+GPU HW active residency:   7.78% (338 MHz: 5.9% 486 MHz: .12% 636 MHz: .88% 796 MHz: .11% 888 MHz: .15% 988 MHz: .61% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  92.22%
+GPU Power: 99 mW
+*** Sampled system activity (Sat Nov 28 04:08:10 2026 +0000) (1012.38ms elapsed) ***
+MTLCompilerService                 48700  2278.20   99.57  0.00    0.00               0.00    0.00              5311.39         
+wine                               48560  2230.25   93.18  851.45  0.00               1595.23 0.00              3669.08         
+MTLCompilerService                 48695  642.84    99.56  0.00    0.00               0.00    0.00              1576.51         
+ReportCrash                        724    992.43    99.55  0.00    0.00               0.00    0.00              946.49          
+wine                               48675  10.82     54.71  810.95  0.00               811.94  0.00              5.40            
+wine                               48677  2.34      42.35  0.00    0.00               0.00    0.00              2.11            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  25% 3048 MHz:  75%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 3.3% 3072 MHz:  93% 3300 MHz: 3.7% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13278 mW
+GPU Power: 53 mW
+**** Thermal pressure ****
+GPU HW active residency:   6.10% (338 MHz: 2.1% 486 MHz: 1.8% 636 MHz: 2.2% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  93.90%
+GPU Power: 53 mW
+*** Sampled system activity (Sat Nov 28 04:08:11 2026 +0000) (1011.27ms elapsed) ***
+MTLCompilerService                 48700  2578.14   98.89  0.00    0.00               0.00    0.00              4632.00         
+wine                               48560  3202.15   73.44  1617.76 0.00               2353.46 0.00              4588.63         
+MTLCompilerService                 48695  830.80    98.73  0.00    0.00               0.00    0.00              1457.86         
+ReportCrash                        724    843.12    95.31  0.00    0.00               0.00    0.00              787.79          
+wine                               48675  12.66     59.33  797.01  0.00               797.01  0.00              8.54            
+wine                               48677  3.91      40.10  0.00    0.00               0.00    0.00              4.41            
+wine                               48679  0.61      46.84  0.99    0.00               0.99    0.00              0.28            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  66% 3048 MHz:  34%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  94% 3300 MHz: 5.8% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13653 mW
+GPU Power: 295 mW
+**** Thermal pressure ****
+GPU HW active residency:  14.52% (338 MHz: 4.6% 486 MHz: 3.6% 636 MHz: 2.5% 796 MHz: .06% 888 MHz: .06% 988 MHz: 1.5% 1084 MHz: 1.7% 1182 MHz: .04% 1278 MHz:   0% 1374 MHz: .07% 1470 MHz: .16% 1578 MHz: .23%)
+GPU idle residency:  85.48%
+GPU Power: 295 mW
+*** Sampled system activity (Sat Nov 28 04:08:12 2026 +0000) (1012.52ms elapsed) ***
+MTLCompilerService                 48700  2862.36   98.83  0.00    0.00               0.00    0.00              5309.19         
+wine                               48560  2526.91   68.68  1014.31 1.98               1770.84 0.00              3477.72         
+MTLCompilerService                 48695  823.80    98.89  0.00    0.00               0.00    0.00              1547.12         
+ReportCrash                        724    894.98    96.83  0.00    0.00               0.00    0.00              845.56          
+wine                               48675  12.11     58.69  797.03  0.00               797.03  0.00              8.39            
+wine                               48677  4.79      39.57  0.00    0.00               0.00    0.00              5.38            
+wine                               48679  0.04      63.04  0.00    0.00               0.00    0.00              0.06            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  63% 3048 MHz:  37%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 8.2% 3072 MHz:  92% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13310 mW
+GPU Power: 184 mW
+**** Thermal pressure ****
+GPU HW active residency:   7.41% (338 MHz: 2.2% 486 MHz: .30% 636 MHz: 1.0% 796 MHz:   0% 888 MHz: .06% 988 MHz: 1.4% 1084 MHz: 1.8% 1182 MHz: .06% 1278 MHz: .06% 1374 MHz: .13% 1470 MHz: .11% 1578 MHz: .16%)
+GPU idle residency:  92.59%
+GPU Power: 184 mW
+*** Sampled system activity (Sat Nov 28 04:08:13 2026 +0000) (1011.28ms elapsed) ***
+wine                               48560  3284.17   58.51  939.39  0.00               1695.84 0.00              4286.52         
+MTLCompilerService                 48700  2312.42   98.63  0.00    0.00               0.00    0.00              4241.08         
+MTLCompilerService                 48695  690.21    98.25  0.00    0.00               0.00    0.00              1369.41         
+ReportCrash                        724    853.77    95.38  0.00    0.00               0.00    0.00              805.27          
+wine                               48677  17.42     37.61  0.00    0.00               0.00    0.00              18.28           
+wine                               48675  12.75     60.88  798.98  0.00               798.98  0.00              9.13            
+wine                               48679  0.34      61.02  0.99    0.00               0.99    0.00              0.41            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  85% 3048 MHz:  15%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz: 7.2% 3072 MHz:  93% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13360 mW
+GPU Power: 251 mW
+**** Thermal pressure ****
+GPU HW active residency:  11.56% (338 MHz: 3.5% 486 MHz: .35% 636 MHz: 1.1% 796 MHz: .28% 888 MHz: .11% 988 MHz: 3.4% 1084 MHz: 2.3% 1182 MHz: .05% 1278 MHz: .04% 1374 MHz: .09% 1470 MHz: .11% 1578 MHz: .27%)
+GPU idle residency:  88.44%
+GPU Power: 251 mW
+*** Sampled system activity (Sat Nov 28 04:08:14 2026 +0000) (1012.64ms elapsed) ***
+wine                               48560  3798.87   62.57  907.28  3.95               1634.88 0.00              4797.22         
+MTLCompilerService                 48700  1192.90   99.05  0.00    0.00               0.00    0.00              2799.40         
+MTLCompilerService                 48695  683.73    98.64  0.00    0.00               0.00    0.00              1538.11         
+ReportCrash                        724    901.76    97.00  0.00    0.00               0.00    0.00              862.42          
+wine                               48675  13.79     60.04  803.62  0.00               803.62  0.00              9.20            
+wine                               48677  7.93      37.81  0.00    0.00               0.00    0.00              6.93            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz: .29% 2700 MHz: .15% 2964 MHz: 100% 3048 MHz: .01%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz: 100% 3300 MHz:   0% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13417 mW
+GPU Power: 92 mW
+**** Thermal pressure ****
+GPU HW active residency:   8.28% (338 MHz: 6.9% 486 MHz: .31% 636 MHz: .27% 796 MHz: .23% 888 MHz: .43% 988 MHz: .10% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  91.72%
+GPU Power: 91 mW
+*** Sampled system activity (Sat Nov 28 04:08:15 2026 +0000) (1012.73ms elapsed) ***
+wine                               48560  3738.49   61.15  856.33  0.00               1542.77 0.00              5238.12         
+MTLCompilerService                 48700  1229.48   99.26  0.00    0.00               0.00    0.00              3250.83         
+MTLCompilerService                 48695  644.98    98.88  0.00    0.00               0.00    0.00              1702.17         
+ReportCrash                        724    962.31    98.17  0.00    0.00               0.00    0.00              921.92          
+wine                               48675  11.72     59.08  804.97  0.00               805.95  0.00              8.59            
+wine                               48677  3.20      39.77  0.00    0.00               0.00    0.00              2.90            
+wine                               48679  0.36      58.32  0.99    0.00               0.99    0.00              0.35            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  98% 3048 MHz: 1.7%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  21% 3300 MHz:  79% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13770 mW
+GPU Power: 89 mW
+**** Thermal pressure ****
+GPU HW active residency:   7.89% (338 MHz: 5.9% 486 MHz:   0% 636 MHz: .41% 796 MHz:   0% 888 MHz:   0% 988 MHz: .90% 1084 MHz: .68% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz: .04%)
+GPU idle residency:  92.11%
+GPU Power: 91 mW
+*** Sampled system activity (Sat Nov 28 04:08:16 2026 +0000) (1014.25ms elapsed) ***
+wine                               48560  4123.89   60.50  918.93  0.00               1660.39 0.00              5098.72         
+MTLCompilerService                 48700  1752.05   98.71  0.00    0.00               0.00    0.00              3332.90         
+MTLCompilerService                 48695  894.14    98.82  0.00    0.00               0.00    0.00              1778.98         
+ReportCrash                        724    880.93    95.79  0.00    0.00               0.00    0.00              840.49          
+wine                               48677  13.45     38.00  0.00    0.00               0.00    0.00              13.12           
+wine                               48675  13.40     60.97  796.67  0.00               796.67  0.00              9.53            
+wine                               48679  0.17      23.08  0.00    0.00               0.00    0.00              0.08            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz: 100% 3048 MHz: .00%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:  15% 3072 MHz:  65% 3300 MHz:  20% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13650 mW
+GPU Power: 861 mW
+**** Thermal pressure ****
+GPU HW active residency:  23.16% (338 MHz: 2.1% 486 MHz: .02% 636 MHz: .44% 796 MHz:   0% 888 MHz: .46% 988 MHz:  16% 1084 MHz: 3.6% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz: .14% 1578 MHz: .40%)
+GPU idle residency:  76.84%
+GPU Power: 859 mW
+*** Sampled system activity (Sat Nov 28 04:08:17 2026 +0000) (1011.68ms elapsed) ***
+wine                               48560  4518.95   68.41  899.50  0.00               1650.73 0.00              5591.77         
+MTLCompilerService                 48700  1029.64   99.64  0.00    0.00               0.00    0.00              2439.48         
+MTLCompilerService                 48695  718.06    99.46  0.00    0.00               0.00    0.00              1812.64         
+ReportCrash                        724    969.76    98.59  0.00    0.00               0.00    0.00              934.66          
+wine                               48675  12.41     57.76  805.60  0.00               805.60  0.00              8.50            
+wine                               48677  1.15      38.66  0.00    0.00               0.00    0.00              1.13            
+wine                               48679  0.29      68.80  0.99    0.00               0.99    0.00              0.13            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz: 100% 3048 MHz: .47%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  70% 3300 MHz:  30% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13015 mW
+GPU Power: 16 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.41% (338 MHz: 2.4% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.59%
+GPU Power: 16 mW
+*** Sampled system activity (Sat Nov 28 04:08:18 2026 +0000) (1012.16ms elapsed) ***
+wine                               48560  4612.02   91.05  1024.57 1.98               1728.03 0.00              7612.50         
+MTLCompilerService                 48695  500.56    99.11  0.00    0.00               0.00    0.00              1431.68         
+ReportCrash                        724    933.89    97.63  0.00    0.00               0.00    0.00              885.58          
+MTLCompilerService                 48700  150.78    98.88  0.00    0.00               0.00    0.00              444.40          
+wine                               48675  11.50     54.45  801.28  0.00               801.28  0.00              7.57            
+wine                               48677  0.62      39.56  0.00    0.00               0.00    0.00              0.78            
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  55% 3048 MHz:  45%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:   0% 3300 MHz:  79% 3516 MHz:  21% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13870 mW
+GPU Power: 13 mW
+**** Thermal pressure ****
+GPU HW active residency:   2.63% (338 MHz: 2.6% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  97.37%
+GPU Power: 13 mW
+*** Sampled system activity (Sat Nov 28 04:08:19 2026 +0000) (1011.76ms elapsed) ***
+MTLCompilerService                 48700  2236.35   98.71  0.00    0.00               0.99    0.00              5331.51         
+wine                               48560  1878.88   94.30  835.15  0.00               1519.08 0.00              3136.77         
+MTLCompilerService                 48695  996.22    99.14  0.00    0.00               0.00    0.00              2381.59         
+ReportCrash                        724    1001.98   99.81  0.00    0.00               0.00    0.00              967.48          
+wine                               48675  9.75      52.67  809.45  0.00               809.45  0.00              4.92            
+wine                               48677  0.13      40.35  0.00    0.00               0.00    0.00              0.17            
+wine                               48679  0.26      73.22  0.99    0.00               0.99    0.00              0.11            
+[48700]MTLCompilerService              	   3721.82	<calculating>
+[48695]MTLCompilerService              	    1464.8	<calculating>
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  19% 3048 MHz:  81%)
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  17% 3300 MHz:  83% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU Power: 13808 mW
+GPU Power: 2 mW
+**** Thermal pressure ****
+GPU HW active residency:   0.41% (338 MHz: .41% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU idle residency:  99.59%
+GPU Power: 2 mW
+rufus@Anthracite ~ % 
