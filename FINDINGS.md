@@ -241,7 +241,7 @@ These are plain, unaligned 256-bit stores. They are not included in the masked-s
 
 #### Second tracking-enabled exception
 
-A repeat command was provided with `0x22f7e6` and `0x22f7ed` added to the explicit `VICTORY_PATCH_MASKED` list, retaining `all` and the eight existing build-specific RVAs. However, the supplied zsh job-termination line displayed `VICTORY_PATCH_MASKED=` with no visible value. That may mean the explicit list was not passed to the process; the startup output is needed to settle this. The next supplied exception was:
+A repeat command was provided with `0x22f7e6` and `0x22f7ed` added to the explicit `VICTORY_PATCH_MASKED` list, retaining `all` and the eight existing build-specific RVAs. The zsh job-termination line displayed `VICTORY_PATCH_MASKED=` with no visible value, but the subsequent startup summary confirms that the two additional RVAs were in fact included: it reported `1244 patched to plain stores`. The next supplied exception was:
 
 ```text
 rosetta error: unexpectedly need to EmulateForward on a synchronous exception
@@ -268,7 +268,7 @@ vmovups [r12+0x78], ymm0
 
 The new RIP is **14 bytes** after the first one. The observed addresses form a contiguous sequence of three seven-byte `vmovups` stores at RVAs `0x22f7e6`, `0x22f7ed`, and `0x22f7f4`. This spatial sequence is confirmed by the instruction bytes. It does **not** prove that execution moved past the first two stores in the same run, because the second run's explicit patch setting and startup patch count have not been verified.
 
-The startup excerpt for this second attempt has not been supplied. Therefore its exact `masked stores N patched to plain stores` count and any warnings for the two manually named RVAs remain unverified. The zsh job line's visible `VICTORY_PATCH_MASKED=` with an empty value is an additional reason not to assume the explicit list reached the process. If both additional sites were successfully passed and patched, the expected count is **1,244** (1,234 scanned sites plus the eight existing automatic RVAs plus two explicit sites). Adding `0x22f7f4` as another unique site would make the expected count **1,245**, assuming all requested sites decode and patch successfully.
+The user subsequently supplied the second attempt's startup summary: `fault tracking on`, mapped base `0x6fffed550000`, and `masked stores 1244 patched to plain stores`. This confirms the two explicitly named RVAs `0x22f7e6` and `0x22f7ed` were included in the patch set: 1,234 scanned stores + eight existing Series 1.0.2.1-specific wide-store RVAs + two additional named wide-store RVAs = **1,244**. The shell job line's apparently empty environment display was therefore misleading/incomplete; the loader's startup count is the authoritative confirmation. Adding `0x22f7f4` as another unique site makes the expected count **1,245**, assuming it decodes and patches successfully.
 
 The pipeline translation and host mesh-pipeline messages immediately after the second exception show that the log contains continuing worker activity around the failure. Their temporal proximity does not establish that mesh-pipeline creation caused the Rosetta exception.
 
@@ -278,7 +278,7 @@ The pipeline translation and host mesh-pipeline messages immediately after the s
 - The first new fault RIP is inside the mapped main executable image, at RVA `0x22f7e6`; it is not the previously observed baseline RIP below the main image base.
 - The failing instruction class matches the documented Rosetta limitation for unaligned 256-bit stores crossing a protected-page boundary.
 - The second observed RIP identifies another store at RVA `0x22f7f4` in the same contiguous instruction sequence.
-- Whether the explicit patches for `0x22f7e6` and `0x22f7ed` were both applied must be confirmed from the second run's startup output before treating the progression as proof of successful patching.
+- The second run's startup count of 1,244 confirms that both additional sites, `0x22f7e6` and `0x22f7ed`, were included in the patch set.
 - No evidence yet establishes that this sequence contains only these three stores, or that patching this sequence will eliminate all Rosetta exceptions.
 
 #### Immediate follow-up
@@ -301,7 +301,7 @@ The pipeline translation and host mesh-pipeline messages immediately after the s
 7. Many draws were reported without host pipelines; the sampled reports showed zero such pipelines actively being made.
 8. The 2026-11-27 baseline Rosetta exception was below the main image base and remained unattributed.
 9. A 2026-11-28 tracking-enabled run confirmed fault tracking on, a mapped base of `0x6fffed550000`, and 1,242 patched stores; it then faulted at main-image RVA `0x22f7e6` on a `vmovups [r12+0x60], ymm0` instruction.
-10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup patch count is still unverified, and the shell job line showed an apparently empty `VICTORY_PATCH_MASKED` assignment.
+10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup output confirmed `fault tracking on` and 1,244 patched stores, verifying that the two preceding sites were added to the patch set.
 
 ### Strong performance lead
 
@@ -313,14 +313,14 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 - How much of the current copy volume is avoidable versus memory that cannot be page-tracked.
 - Which exact shader hashes account for the largest visually significant missing passes.
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
-- Whether the second tracking-enabled attempt successfully patched RVAs `0x22f7e6` and `0x22f7ed` (its startup patch count and warnings have not been supplied).
+- Whether adding RVA `0x22f7f4` will allow this store sequence to complete without another Rosetta exception.
 - Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
 
 ## 8. Recommended next experiments
 
 1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
-2. **Verify the tracking-enabled patch run.** Inspect `/tmp/victory-rva-test.log` for the exact patch count and warnings, and check whether `VICTORY_PATCH_MASKED` was actually present in the process environment. The expected count for the two newly named RVAs is 1,244; do not assume either patch applied without that output.
-3. **Continue the wide-store sequence in a controlled way.** If the startup count confirms both earlier sites were patched, add RVA `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs. The expected count is then 1,245. Keep the full log for each attempt.
+2. **Continue the wide-store sequence in a controlled way.** The second attempt's startup summary is confirmed at 1,244 patched stores, including RVAs `0x22f7e6` and `0x22f7ed`. Add `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs; the expected count is 1,245.
+3. **Retain the full log for the next attempt.** Record the startup patch count and any `not a masked store or a plain 256-bit store` warnings, then capture the next RIP and instruction bytes if Rosetta still stops.
 4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
 5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
 
