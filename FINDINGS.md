@@ -10,7 +10,8 @@
 
 branch: https://github.com/ViciousSquid/VIctory-macOS/tree/patch/runtime-patch-data works at 4FPS on Macbook Air M5 
 
-(use `Launch.sh` and select the EXE)
+run VIctory's `setup.sh` first
+then use `Launch.sh` and select the EXE
 
 ----
 
