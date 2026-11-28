@@ -90,7 +90,7 @@ VICTORY_FAULT_TRACKING=1
 
 When enabled under Rosetta, `stores_need_patching()` becomes true. For this exact Series 1.0.2.1 executable hash, `apps/victory/src/run.rs` also adds eight known RVAs for plain 256-bit vector stores to the automatic patch selection. The explicit `VICTORY_PATCH_MASKED` setting can override the automatic selection.
 
-**This switch has not been validated in the captured run.** Do not interpret the existence of the switch as proof that enabling it will be stable on this machine. The source records earlier Rosetta failures, including cases involving wide stores, and the patch path should be tested with startup patch counts and a fresh log.
+**The 2026-11-27 baseline did not validate this switch.** A 2026-11-28 follow-up did enable it and startup confirmed `fault tracking on`, but that run subsequently hit a Rosetta exception at a plain 256-bit store. This does not establish that the tracking-enabled configuration is stable on this machine. The source records earlier Rosetta failures involving wide stores, so each patch experiment must be checked against the startup patch count and a fresh log.
 
 A further distinction: only the runtime's GPU memory pools, physical-page views, and placeholders participate in this page tracking design. Other memory ranges (including some C-heap memory) are still copied whole. Enabling tracking therefore does not promise zero whole-range copies.
 
@@ -241,7 +241,7 @@ These are plain, unaligned 256-bit stores. They are not included in the masked-s
 
 #### Second tracking-enabled exception
 
-A repeat run was launched with `0x22f7e6` and `0x22f7ed` added to the explicit `VICTORY_PATCH_MASKED` list, retaining `all` and the eight existing build-specific RVAs. The next supplied exception was:
+A repeat command was provided with `0x22f7e6` and `0x22f7ed` added to the explicit `VICTORY_PATCH_MASKED` list, retaining `all` and the eight existing build-specific RVAs. However, the supplied zsh job-termination line displayed `VICTORY_PATCH_MASKED=` with no visible value. That may mean the explicit list was not passed to the process; the startup output is needed to settle this. The next supplied exception was:
 
 ```text
 rosetta error: unexpectedly need to EmulateForward on a synchronous exception
@@ -266,9 +266,9 @@ The bytes at the reported RIP decode to:
 vmovups [r12+0x78], ymm0
 ```
 
-The new RIP is **14 bytes** after the first one. The observed addresses form a contiguous sequence of three seven-byte `vmovups` stores at RVAs `0x22f7e6`, `0x22f7ed`, and `0x22f7f4`. This progression is consistent with execution moving past the first two sites and reaching the third, but it does **not by itself prove** that both earlier patch trampolines were installed and executed.
+The new RIP is **14 bytes** after the first one. The observed addresses form a contiguous sequence of three seven-byte `vmovups` stores at RVAs `0x22f7e6`, `0x22f7ed`, and `0x22f7f4`. This spatial sequence is confirmed by the instruction bytes. It does **not** prove that execution moved past the first two stores in the same run, because the second run's explicit patch setting and startup patch count have not been verified.
 
-The startup excerpt for this second attempt has not been supplied. Therefore its exact `masked stores N patched to plain stores` count and any warnings for the two manually named RVAs remain unverified. If both additional sites were successfully patched, the expected count is **1,244** (1,234 scanned sites plus the eight existing automatic RVAs plus two explicit sites). Adding `0x22f7f4` as another unique site would make the expected count **1,245**, assuming all requested sites decode and patch successfully.
+The startup excerpt for this second attempt has not been supplied. Therefore its exact `masked stores N patched to plain stores` count and any warnings for the two manually named RVAs remain unverified. The zsh job line's visible `VICTORY_PATCH_MASKED=` with an empty value is an additional reason not to assume the explicit list reached the process. If both additional sites were successfully passed and patched, the expected count is **1,244** (1,234 scanned sites plus the eight existing automatic RVAs plus two explicit sites). Adding `0x22f7f4` as another unique site would make the expected count **1,245**, assuming all requested sites decode and patch successfully.
 
 The pipeline translation and host mesh-pipeline messages immediately after the second exception show that the log contains continuing worker activity around the failure. Their temporal proximity does not establish that mesh-pipeline creation caused the Rosetta exception.
 
@@ -294,14 +294,14 @@ The pipeline translation and host mesh-pipeline messages immediately after the s
 
 1. The tested game build is Series 1.0.2.1 with the hash recorded above.
 2. Victory detects 1,234 masked/vector store candidates in the executable.
-3. Fault-based title-memory tracking was off in this run.
+3. Fault-based title-memory tracking was off in the 2026-11-27 baseline; a 2026-11-28 follow-up confirmed it on.
 4. The world-stage reports show multi-second frames, tens of gigabytes of title-memory copy traffic, and substantial texture-preparation work.
 5. Some wave64 operations are refused where the two-half lowering cannot safely synchronize.
 6. At least one mesh shader exceeded Metal's 32 KiB mesh-output limit.
 7. Many draws were reported without host pipelines; the sampled reports showed zero such pipelines actively being made.
 8. The 2026-11-27 baseline Rosetta exception was below the main image base and remained unattributed.
 9. A 2026-11-28 tracking-enabled run confirmed fault tracking on, a mapped base of `0x6fffed550000`, and 1,242 patched stores; it then faulted at main-image RVA `0x22f7e6` on a `vmovups [r12+0x60], ymm0` instruction.
-10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. The second run's startup patch count is still unverified.
+10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup patch count is still unverified, and the shell job line showed an apparently empty `VICTORY_PATCH_MASKED` assignment.
 
 ### Strong performance lead
 
@@ -309,7 +309,7 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 
 ### Still unproven
 
-- Whether enabling fault tracking with the built-in Series 1.0.2.1 patches is stable on this macOS/Rosetta setup.
+- Whether fault tracking can run stably on this macOS/Rosetta setup after every faulting plain 256-bit store in the executable and relevant title DLLs has been patched.
 - How much of the current copy volume is avoidable versus memory that cannot be page-tracked.
 - Which exact shader hashes account for the largest visually significant missing passes.
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
@@ -319,7 +319,7 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 ## 8. Recommended next experiments
 
 1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
-2. **Verify the tracking-enabled patch run.** Inspect `/tmp/victory-rva-test.log` for the exact patch count and warnings. The expected count for the two newly named RVAs is 1,244; do not assume both patches applied without that output.
+2. **Verify the tracking-enabled patch run.** Inspect `/tmp/victory-rva-test.log` for the exact patch count and warnings, and check whether `VICTORY_PATCH_MASKED` was actually present in the process environment. The expected count for the two newly named RVAs is 1,244; do not assume either patch applied without that output.
 3. **Continue the wide-store sequence in a controlled way.** If the startup count confirms both earlier sites were patched, add RVA `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs. The expected count is then 1,245. Keep the full log for each attempt.
 4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
 5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
