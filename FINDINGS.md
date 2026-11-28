@@ -1,6 +1,7 @@
 # VIctory macOS — investigation findings
 
 **Baseline date:** 2026-11-27 (UTC); **Rosetta follow-up:** 2026-11-28 00:10–00:16 UTC  
+**Wide-store-list follow-up:** 2026-11-28 (after the 00:26 UTC exception)  
 **Executable SHA-256:** `b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93`  
 **Tested source revision:** `87917243b0560571e9ff8ab39479031cc5e4b70c` (`8791724`)  
 **Baseline log:** `/tmp/victory-warm.log`, approximately 23:30–23:31 UTC  
@@ -390,13 +391,77 @@ The source comments identify the cached mapped executable under `<cache_dir>/ima
 
 #### Immediate follow-up
 
-1. Use `tools/macos/victory.sh config` locally to obtain `cache_dir`, then list large files matching `images/victory-image-*.dll`. The exact filename uses the first 16 hex characters of the BLAKE3 hash, not the logged full SHA-256 hash. Identify the main executable image by its size (roughly the game executable's size); if more than one large cached image exists, do not guess which build it is.
-2. Run `cargo xtask wide-stores <cached-image> > /tmp/victory-wide-sites.txt`. The command requires `llvm-objdump` (installable with `brew install llvm` if absent). Its stderr summary reports the number of 256-bit stores found, patch sites listed, and four-byte stores it could not safely cover.
+1. **Completed:** located the single large cached image in the checkout's active Wine prefix. The exact prefix, path, filename and size are recorded in §6.4.
+2. **Completed:** generated `/tmp/victory-wide-sites.txt` with `cargo xtask wide-stores`; the file contains 117,413 newline-terminated entries. The generator's stderr summary was not retained in the supplied terminal output, so its total disassembled-store count and number of four-byte stores left unlisted are not yet recorded.
 3. When using the complete generated list, set `VICTORY_PATCH_MASKED=all` for the scanned masked/vector stores and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt` for the remaining unmasked 256-bit stores. Do not also keep the old manually named wide-store RVAs in `VICTORY_PATCH_MASKED`: the generated wide list includes those unmasked stores, and applying both patch mechanisms to overlapping sites can make the second patch reject already-modified bytes.
 4. Confirm startup reports both `masked stores ... patched to plain stores` and `wide stores ... split into 128-bit halves`. Record the patched and refused counts; do not assume every site was patched.
 5. Preserve the complete log and inspect the next Rosetta RIP if one occurs. A listed four-byte store may still be left unpatched if the generator cannot safely move enough adjacent instructions or a branch targets the candidate run.
 
 The accompanying log lines showed host copies of title memory being released while memory was low, followed by completed DirectStorage read batches (including one batch of 1,309 requests). These establish memory-pressure handling and ongoing storage progress, but do not identify the cause of the Rosetta exception.
+
+
+### 6.4. Cached-image discovery and wide-store list — 2026-11-28
+
+The local search initially checked the conventional CrossOver bottles directory:
+
+```text
+~/Library/Application Support/CrossOver/Bottles
+```
+
+That directory contained neither a `victory-image-*.dll` file nor a directory matching `victory/cache`. This was a search-path mismatch, not evidence that VIctory had no image cache.
+
+The macOS launcher in `tools/macos/victory.sh` sets its default Wine prefix to the checkout-local path `$ROOT/target/wineprefix-play` (unless `WINEPREFIX` is already set). The matching cache was found under:
+
+```text
+target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/
+```
+
+Exactly one matching large image was reported:
+
+- **File:** `victory-image-b99f876b74d4a77f.dll`
+- **Size:** 120,181,760 bytes (approximately 114.6 MiB)
+- **Search result:** one candidate matching `victory-image-*.dll` and larger than 80 MiB
+
+The filename is the cache-generated name described in §6.3; it should not be reconstructed from the logged SHA-256.
+
+The first `command -v llvm-objdump` check returned no path. After installing Homebrew LLVM and adding its `bin` directory to the command's `PATH`, the following generation command completed successfully:
+
+```bash
+PATH="$(brew --prefix llvm)/bin:$PATH" cargo xtask wide-stores \
+  "$PWD/target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/victory-image-b99f876b74d4a77f.dll" \
+  > /tmp/victory-wide-sites.txt
+```
+
+The user supplied the command's success message and this line count:
+
+```text
+117413 /tmp/victory-wide-sites.txt
+```
+
+The resulting file therefore contains **117,413 list entries**. Per `xtask/src/wide_stores.rs`, each line describes a patch site using its RVA, overwritten byte count, and instruction pieces; it contains offsets and patch metadata, not game assets or the executable's contents. The generator disassembles the cached image's `.text` section, lists plain 256-bit stores, and excludes the masked-store forms handled by `VICTORY_PATCH_MASKED`.
+
+**Important qualification:** 117,413 is the number of generated list lines, not the number of sites the runtime will successfully patch. The generator's stderr summary (total stores found and four-byte stores it could not safely cover) was not included in the terminal output supplied for this record. The runtime patcher independently checks each site's bytes and can refuse a site if a trampoline cannot be built; startup reports the actual `wide stores N split into 128-bit halves (M refused)` result. A successful generation command alone does not verify that RVA `0x4F48E54` is covered, or that any site has yet been patched in a game run.
+
+#### Next controlled run
+
+The loader source in `apps/victory/src/run.rs` confirms that an explicit `VICTORY_PATCH_MASKED` setting overrides the automatic Series 1.0.2.1 selection, which otherwise includes `all` plus eight build-specific plain wide-store RVAs. With the complete generated list enabled, use:
+
+```bash
+VICTORY_FAULT_TRACKING=1 \
+VICTORY_PATCH_MASKED=all \
+VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt \
+./Launch.sh
+```
+
+Here, `VICTORY_PATCH_MASKED=all` prevents the eight automatically-added plain wide-store RVAs from also being sent through the masked-store patcher; the generated `VICTORY_PATCH_WIDE` list is intended to handle the plain 256-bit stores. Do not append the previously hand-entered plain-store RVAs to `VICTORY_PATCH_MASKED` for this run.
+
+The next startup log must be checked for all of the following:
+
+1. `fault tracking on`
+2. `masked stores N patched to plain stores`
+3. `wide stores N split into 128-bit halves (M refused)`
+
+Record both wide-store counts. In particular, a nonzero refused count is not automatically fatal, but it means some generated sites were not applied and the exception path may remain. Preserve the full log and capture any new Rosetta RIP and instruction bytes.
 
 ## 7. Current interpretation
 
@@ -414,6 +479,8 @@ The accompanying log lines showed host copies of title memory being released whi
 10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup output confirmed `fault tracking on` and 1,244 patched stores, verifying that the two preceding sites were added to the patch set.
 11. The next run's startup excerpt confirms `fault tracking on`, mapped base `0x6fffed550000`, and 1,245 patched stores. Its exception at `0x6fffee32821a` is therefore at confirmed main-image RVA `0xDD821A`; the supplied bytes also identify a second candidate store at RVA `0xDD8222`.
 12. A further exception occurred at `0x6ffff2498e54`; the instruction at the RIP decodes to `vmovups [rsi], ymm4`. Relative to the last confirmed base, the candidate RVA is `0x4F48E54`, but the mapped base and patch count from this latest run are still required to confirm it.
+13. The local cache search found one 120,181,760-byte image at `target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/victory-image-b99f876b74d4a77f.dll`; the conventional CrossOver Bottles directory did not contain this cache.
+14. `cargo xtask wide-stores` completed against that cached image and wrote 117,413 lines to `/tmp/victory-wide-sites.txt`. This confirms generation and file length only; it does not establish how many runtime sites will patch successfully.
 11. A later exception was reported at `0x6fffee32821a`, with bytes decoding to two consecutive 256-bit `vmovups` stores. The same run's startup excerpt confirms the main-image base `0x6fffed550000` and 1,245 stores patched, giving confirmed main-image RVAs `0xDD821A` and `0xDD8222` for the two candidate sites.
 
 ### Strong performance lead
@@ -428,15 +495,16 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
 - Whether adding RVA `0x22f7f4` will allow that first store sequence to complete without another Rosetta exception.
 - Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let that part of the title proceed without another Rosetta exception.
-- Whether RVA `0x4F48E54` is in the cached main image's executable `.text` section and is included in the generated `wide-stores` site list.
+- Whether RVA `0x4F48E54` is covered by an entry in `/tmp/victory-wide-sites.txt`; the generated file exists, but its contents have not yet been checked against this RVA.
+- How many of the 117,413 generated entries the runtime patcher will apply versus refuse, and whether the previously identified Series 1.0.2.1 plain-store RVAs are covered by the list.
 - Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
 
 ## 8. Recommended next experiments
 
 1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
-2. **Continue the wide-store sequence in a controlled way.** The second attempt's startup summary is confirmed at 1,244 patched stores, including RVAs `0x22f7e6` and `0x22f7ed`. Add `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs; the expected count is 1,245.
-3. **Use the complete wide-store patcher for plain 256-bit stores.** The current faulting `vmovups [rsi], ymm4` is four bytes long, so `VICTORY_PATCH_MASKED` cannot patch it by itself. Generate the full site list with `cargo xtask wide-stores` from the cached mapped title image and apply it with `VICTORY_PATCH_WIDE`.
-4. **Retain the full log for the next attempt.** Record the startup patch count and any `not a masked store or a plain 256-bit store` warnings, then capture the next RIP and instruction bytes if Rosetta still stops.
+2. **Run the generated wide-store patcher in a controlled test.** The exact cached image has been found and `/tmp/victory-wide-sites.txt` now contains 117,413 generated entries. Launch with `VICTORY_FAULT_TRACKING=1`, `VICTORY_PATCH_MASKED=all`, and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt`. The explicit masked setting prevents the automatic eight plain-store RVAs from also being sent through the masked-store patcher; the generated list handles the plain 256-bit stores.
+3. **Verify actual application, not just list generation.** Retain the startup lines for `masked stores N patched to plain stores` and `wide stores N split into 128-bit halves (M refused)`. The 117,413 list entries are not a promise that all sites will be patched. Check whether the entry covering RVA `0x4F48E54` is present and whether its runtime site is accepted.
+4. **Retain the full log for the next attempt.** Record the patch counts and refused count, then capture the next RIP and instruction bytes if Rosetta still stops.
 4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
 5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
 
@@ -447,6 +515,8 @@ The following implementation files explain the mechanisms discussed above:
 - [`apps/victory/src/run.rs`](apps/victory/src/run.rs) — build identification, masked-store scan, fault-tracking report, automatic Series 1.0.2.1 patch RVAs, CLWB handling.
 - [`crates/victory-gpu/src/watch.rs`](crates/victory-gpu/src/watch.rs) — Rosetta detection, fault-tracking default, guarded-page write tracking.
 - [`crates/victory-loader/src/masked.rs`](crates/victory-loader/src/masked.rs) — AVX/vector store scanning and trampoline patching.
+- [`xtask/src/wide_stores.rs`](xtask/src/wide_stores.rs) — offline disassembly and generation of the `VICTORY_PATCH_WIDE` site list.
+- [`crates/victory-loader/src/wide.rs`](crates/victory-loader/src/wide.rs) — runtime validation and splitting of plain 256-bit stores into 128-bit halves.
 - [`crates/victory-gpu/src/memory.rs`](crates/victory-gpu/src/memory.rs) and [`crates/victory-gpu/src/host.rs`](crates/victory-gpu/src/host.rs) — title-memory shadows, refresh/copy preparation, and per-frame reporting.
 - [`crates/victory-shader/src/emit/lower/halves.rs`](crates/victory-shader/src/emit/lower/halves.rs) — wave64-on-wave32 lowering and cross-half refusal conditions.
 - [`crates/victory-shader/src/emit/mesh_size.rs`](crates/victory-shader/src/emit/mesh_size.rs) and [`crates/victory-gpu/src/pipeline/host.rs`](crates/victory-gpu/src/pipeline/host.rs) — Metal mesh-output sizing and over-limit rejection.
