@@ -11,70 +11,70 @@ echo "========== MEMORY PRESSURE =========="
 cat "$OUT/memory-pressure.txt"
 ========== PROCESS CPU / RAM ==========
 
-04:02:52 47740 45339 240.3 35.5 8923316 04:02 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:52 47740 45339 240.3 35.5 8923316 04:02 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:53 47740 45339 116.3 34.1 8583212 04:03 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:53 47740 45339 116.3 34.1 8583212 04:03 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:54 47740 45339 108.6 31.7 7973128 04:04 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:54 47740 45339 108.6 31.7 7973128 04:04 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:55 47740 45339 255.5 31.7 7971420 04:05 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:55 47740 45339 255.5 31.7 7971420 04:05 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:56 47740 45339 162.2 31.3 7869952 04:06 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:56 47740 45339 162.2 31.3 7869952 04:06 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:57 47740 45339  72.3 31.4 7910644 04:07 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:57 47740 45339  72.3 31.4 7910644 04:07 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:58 47740 45339 239.5 32.0 8051296 04:08 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:58 47740 45339 239.5 32.0 8051296 04:08 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:02:59 47740 45339 329.1 32.0 8044528 04:09 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:02:59 47740 45339 329.1 32.0 8044528 04:09 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:00 47740 45339 309.7 26.3 6628332 04:10 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:00 47740 45339 309.7 26.3 6628332 04:10 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:01 47740 45339 283.8 23.2 5850840 04:11 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:01 47740 45339 283.8 23.2 5850840 04:11 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:02 47740 45339 279.7 22.0 5539844 04:12 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:02 47740 45339 279.7 22.0 5539844 04:12 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:03 47740 45339 182.8 21.9 5499852 04:13 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:03 47740 45339 182.8 21.9 5499852 04:13 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:04 47740 45339 204.6 21.8 5489476 04:14 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:04 47740 45339 204.6 21.8 5489476 04:14 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:05 47740 45339 255.8 21.9 5509340 04:15 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:05 47740 45339 255.8 21.9 5509340 04:15 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:06 47740 45339 280.8 21.8 5478600 04:16 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:06 47740 45339 280.8 21.8 5478600 04:16 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:07 47740 45339 269.1 21.6 5426076 04:17 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:07 47740 45339 269.1 21.6 5426076 04:17 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:08 47740 45339 207.7 21.5 5410220 04:18 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:08 47740 45339 207.7 21.5 5410220 04:18 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:10 47740 45339 135.8 21.7 5458160 04:20 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:10 47740 45339 135.8 21.7 5458160 04:20 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:11 47740 45339 203.1 21.5 5416264 04:21 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:11 47740 45339 203.1 21.5 5416264 04:21 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:12 47740 45339   5.0 21.5 5415604 04:22 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:12 47740 45339   5.0 21.5 5415604 04:22 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:13 47740 45339 362.6 21.4 5393684 04:23 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:13 47740 45339 362.6 21.4 5393684 04:23 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:14 47740 45339 350.0 21.1 5318072 04:24 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:14 47740 45339 350.0 21.1 5318072 04:24 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:15 47740 45339 323.9 20.9 5262552 04:25 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:15 47740 45339 323.9 20.9 5262552 04:25 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:16 47740 45339 308.1 20.7 5207040 04:26 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:16 47740 45339 308.1 20.7 5207040 04:26 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:17 47740 45339 266.2 20.9 5248512 04:27 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:17 47740 45339 266.2 20.9 5248512 04:27 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:18 47740 45339 269.6 20.9 5266808 04:28 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:18 47740 45339 269.6 20.9 5266808 04:28 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:19 47740 45339 227.1 21.0 5291212 04:29 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:19 47740 45339 227.1 21.0 5291212 04:29 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:20 47740 45339 444.6 21.0 5277260 04:30 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:20 47740 45339 444.6 21.0 5277260 04:30 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:21 47740 45339 228.1 20.9 5267124 04:31 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:21 47740 45339 228.1 20.9 5267124 04:31 <VICTORY_EXECUTABLE_PATH_REDACTED>
 
-04:03:22 47740 45339 246.7 21.1 5304556 04:32 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+04:03:22 47740 45339 246.7 21.1 5304556 04:32 <VICTORY_EXECUTABLE_PATH_REDACTED>
 ========== MAC HARDWARE TELEMETRY ==========
 Machine model: Mac17,3
 OS version: 25G332
 Boot arguments: 
-Boot time: Fri Nov 27 01:36:43 2026
+Boot time: [redacted]
 
 Second underflow occured.
 
@@ -109,16 +109,16 @@ Activity Monitor                   12994  2.35      84.07  0.00    0.00         
 fseventsd                          98     2.20      52.86  0.00    0.99               32.64   0.00              1.01            
 contextstored                      133    1.15      60.00  0.00    0.00               0.00    0.00              0.58            
 AppleCentauriAlpha                 359    1.29      63.00  0.00    0.00               15.83   0.00              0.51            
-Karabiner-Console-User-Server      1874   1.02      27.20  0.00    0.00               2.97    0.00              0.48            
+third_party_process      1874   1.02      27.20  0.00    0.00               2.97    0.00              0.48            
 logd                               94     0.99      31.74  0.00    0.00               0.00    0.00              0.47            
 notifyd                            160    0.61      46.11  0.00    0.00               0.00    0.00              0.34            
 corebrightnessd                    162    0.65      51.35  0.00    0.00               0.00    0.00              0.28            
 distnoted                          149    0.47      42.37  0.00    0.00               0.99    0.00              0.26            
-Telegram                           13074  0.80      61.91  0.00    0.00               60.34   0.00              0.25            
+third_party_process                           13074  0.80      61.91  0.00    0.00               60.34   0.00              0.25            
 PerfPowerServices                  151    0.54      30.02  0.00    0.00               1.98    0.00              0.23            
 Finder                             473    0.35      69.46  0.00    0.00               0.00    0.00              0.22            
 distnoted                          427    0.36      72.84  0.00    0.00               0.99    0.00              0.20            
-Karabiner-Core-Service             1873   0.46      52.35  0.00    0.00               2.97    0.00              0.20            
+third_party_process             1873   0.46      52.35  0.00    0.00               2.97    0.00              0.20            
 bluetoothd                         159    0.42      51.41  0.00    0.00               0.99    0.00              0.19            
 sysmond                            379    0.35      26.20  0.00    0.00               0.00    0.00              0.18            
 Microsoft Edge Helper (Aperitif    46158  0.44      76.28  0.00    0.00               1.98    0.00              0.16            
@@ -131,7 +131,7 @@ airportd                           214    0.22      54.59  0.00    0.00         
 Microsoft Edge Helper (Aperitif)   45175  0.13      7.05   0.00    0.00               0.99    0.00              0.07            
 distnoted                          330    0.13      15.36  0.00    0.00               0.99    0.00              0.06            
 duetexpertd                        540    0.17      57.95  0.00    0.00               0.00    0.00              0.06            
-WhatsApp                           23964  0.20      62.66  0.00    0.00               10.88   0.00              0.06            
+third_party_process                           23964  0.20      62.66  0.00    0.00               10.88   0.00              0.06            
 distnoted                          339    0.12      16.89  0.00    0.00               0.99    0.00              0.06            
 AppleCentauriBeta                  361    0.13      58.56  0.00    0.00               2.97    0.00              0.05            
 distnoted                          350    0.10      19.12  0.00    0.00               0.99    0.00              0.05            
@@ -159,7 +159,7 @@ thermalmonitord                    132    0.08      41.54  0.00    0.00         
 gamecontrollerd                    44260  0.08      39.38  0.00    0.00               0.99    0.00              0.03            
 Microsoft Edge Helper (Aperitif    45195  0.10      89.93  0.00    0.00               1.98    0.00              0.03            
 symptomsd                          261    0.08      47.65  0.00    0.00               0.99    0.00              0.03            
-LinearMouse                        582    0.05      22.25  0.00    0.00               0.99    0.00              0.03            
+third_party_process                        582    0.05      22.25  0.00    0.00               0.99    0.00              0.03            
 universalaccessd                   439    0.06      54.01  0.00    0.00               0.99    0.00              0.03            
 lsd                                448    0.06      49.89  0.00    0.00               0.00    0.00              0.02            
 cfprefsd                           428    0.05      40.72  0.00    0.00               0.00    0.00              0.02            
@@ -266,7 +266,7 @@ wine                               48677  2.59      42.45  0.00    0.00         
 runningboardd                      171    3.80      39.69  0.00    0.00               0.98    0.00              2.10            
 xprotectd                          134    1.77      98.37  0.00    0.00               1.97    0.00              1.45            
 Activity Monitor                   12994  2.57      84.54  0.00    0.00               4.91    0.00              1.36            
-WhatsApp                           23964  2.68      28.58  0.00    0.00               14.74   0.00              1.32            
+third_party_process                           23964  2.68      28.58  0.00    0.00               14.74   0.00              1.32            
 launchd                            1      2.86      38.05  0.00    0.00               0.00    0.00              1.30            
 Finder                             473    2.36      36.68  0.00    0.00               3.93    0.00              1.25            
 mdworker_shared                    48769  1.97      60.40  0.00    0.00               0.00    0.00              1.24            
@@ -286,7 +286,7 @@ wine                               48679  0.30      58.27  0.98    0.00         
 notifyd                            160    0.57      46.71  0.00    0.00               0.00    0.00              0.34            
 UIKitSystem                        543    0.70      13.50  0.00    0.00               0.00    0.00              0.31            
 corebrightnessd                    162    0.59      50.87  0.00    0.00               0.00    0.00              0.26            
-Telegram                           13074  0.83      58.54  0.00    0.00               60.92   0.00              0.26            
+third_party_process                           13074  0.83      58.54  0.00    0.00               60.92   0.00              0.26            
 nsurlsessiond                      458    0.55      16.83  0.00    0.00               0.00    0.00              0.26            
 diskarbitrationd                   126    0.46      66.94  0.00    0.00               0.00    0.00              0.26            
 powerd                             108    0.42      46.34  0.00    0.00               0.00    0.00              0.22            
@@ -294,7 +294,7 @@ PerfPowerServices                  151    0.48      42.85  0.00    0.00         
 ========== CPU PROFILE ==========
 Analysis of sampling wine (pid 47740) every 10 milliseconds
 Process:         victory.exe [47740]
-Path:            /Users/*/wine
+Path: <Wine executable path redacted>
 Load Address:    0x200000000
 Identifier:      wine
 Version:         0
@@ -435,4 +435,3 @@ Call graph:
 ========== MEMORY PRESSURE ==========
 The system has 25769803776 (1572864 pages with a page size of 16384).
 System-wide memory free percentage: 75%
-rufus@Anthracite ~ % 
