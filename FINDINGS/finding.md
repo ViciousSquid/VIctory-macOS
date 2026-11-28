@@ -391,3 +391,45 @@ The PR contains exactly these two generated data files:
 - \`runtime-patches/victory-wide-dlls/2d3fbea0ca5034e7.txt\` — 122 \`xboxbvhbuilder.dll\` patch sites.
 
 The manifests preserve the generated site data. Runtime patching is performed by the existing VIctory loader when the corresponding environment settings are enabled.
+
+---
+
+## 12. Follow-up hardware telemetry — 2026-11-28
+
+The full 30-second hardware telemetry capture is preserved in **FINDINGS/results2.txt**. It contains one-second powermetrics samples from 04:07:50 through 04:08:19 UTC. The earlier, separate process/profile capture is preserved in **FINDINGS/results.txt**.
+
+### Measured across the 30-second telemetry capture
+
+| Metric | Result |
+|---|---:|
+| Wine process (PID 48560) CPU use | 2,841 CPU ms/s average (~2.84 logical-core equivalents); range 1,081–4,699 ms/s |
+| MTLCompilerService processes (PIDs 48700 and 48695) | 2,985 CPU ms/s combined average (~2.99 core equivalents); range 651–4,010 ms/s |
+| ReportCrash process (PID 724) | 930 CPU ms/s average (~0.93 core equivalent) |
+| GPU hardware active residency | 7.95% average; range 0.41–23.16% |
+| GPU power | 126 mW average; peak 859 mW |
+| CPU power | 13.59 W average; range 12.97–14.99 W |
+
+The GPU was not continuously idle: it became more active in several samples, including 23.16% active residency and 859 mW at 04:08:16. Across the whole sample it was idle for about 92% of measured time. This does not look like sustained GPU saturation, but the capture alone cannot prove the GPU is never a frame-time bottleneck.
+
+The two MTLCompilerService processes consumed substantial CPU throughout much of the sample. This is evidence of significant host-side Metal compiler activity during the run. It does not, by itself, identify which shader or pipeline work was being compiled, prove that compilation is the only CPU bottleneck, or establish a causal relationship with individual frame stalls.
+
+### Metal compiler crash status — corrected
+
+A search of the recent DiagnosticReports directory returned no matching Metal/MTLCompilerService crash report. The user has confirmed that the Metal compiler is not crashing. Do **not** describe the MTLCompilerService activity as a crash.
+
+A process named ReportCrash appears in the powermetrics task list at roughly 0.93 CPU core on average. That listing is not proof that MTLCompilerService crashed, and no causal link has been established. Treat it as a separate unexplained process observation unless further evidence identifies what it was handling.
+
+### Capture limitations
+
+- This 30-second powermetrics capture occurred around 04:07:50–04:08:19 UTC. The separate process CPU/RSS and sample-profiler capture in results.txt was around 04:02:52 UTC. They are not time-aligned and must not be correlated as if they were simultaneous.
+- The process sampler and hardware telemetry use different PIDs because they were captured in separate sessions.
+- The earlier sample-profiler excerpt is truncated to its first 140 lines and is dominated by AppKit event handling and repeated Wine/Rosetta syscall-dispatch frames. It does not provide a reliable gameplay hotspot breakdown.
+- The current data supports investigating CPU-side runtime/driver/compiler work first, while retaining GPU-side measurement. It does not justify declaring a single definitive bottleneck.
+
+### Immediate profiling priorities
+
+1. Repeat a controlled run in the same scene and capture frame-time/FPS logs and the full powermetrics stream at the same time.
+2. Compare a cold shader/pipeline-cache run with a subsequent warm run without deleting caches between the two measurements. Record whether MTLCompilerService CPU use falls and whether frame time improves.
+3. Capture a useful Wine process profile over the same interval. Preserve the complete profile rather than only the first 140 lines; if stack unwinding still resolves mostly to Wine/Rosetta trampolines, use Instruments or targeted in-process markers to identify actual work.
+4. Keep GPU active residency, GPU power, CPU utilisation, pipeline creation counters, copy volume and rendered FPS in the same timestamped run. Do not infer GPU execution time from a host submission/fence wall-time field.
+5. Do not change resolution, shader implementations, memory-retention policy or patch manifests until a repeatable measurement shows which subsystem is limiting progress.
