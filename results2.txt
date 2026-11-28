@@ -473,4 +473,3 @@ GPU Power: 2 mW
 GPU HW active residency:   0.41% (338 MHz: .41% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
 GPU idle residency:  99.59%
 GPU Power: 2 mW
-rufus@Anthracite ~ % 
