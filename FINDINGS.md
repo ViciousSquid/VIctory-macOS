@@ -505,8 +505,8 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 2. **Run the generated wide-store patcher in a controlled test.** The exact cached image has been found and `/tmp/victory-wide-sites.txt` now contains 117,413 generated entries. Launch with `VICTORY_FAULT_TRACKING=1`, `VICTORY_PATCH_MASKED=all`, and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt`. The explicit masked setting prevents the automatic eight plain-store RVAs from also being sent through the masked-store patcher; the generated list handles the plain 256-bit stores.
 3. **Verify actual application, not just list generation.** Retain the startup lines for `masked stores N patched to plain stores` and `wide stores N split into 128-bit halves (M refused)`. The 117,413 list entries are not a promise that all sites will be patched. Check whether the entry covering RVA `0x4F48E54` is present and whether its runtime site is accepted.
 4. **Retain the full log for the next attempt.** Record the patch counts and refused count, then capture the next RIP and instruction bytes if Rosetta still stops.
-4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
-5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
+5. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
+6. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
 
 ## Source locations
 
