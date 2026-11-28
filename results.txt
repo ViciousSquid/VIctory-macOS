@@ -1,0 +1,438 @@
+echo "========== PROCESS CPU / RAM =========="
+cat "$OUT/process.txt"
+
+echo "========== MAC HARDWARE TELEMETRY =========="
+head -220 "$OUT/powermetrics.txt"
+
+echo "========== CPU PROFILE =========="
+head -140 "$OUT/victory.sample.txt"
+
+echo "========== MEMORY PRESSURE =========="
+cat "$OUT/memory-pressure.txt"
+========== PROCESS CPU / RAM ==========
+
+04:02:52 47740 45339 240.3 35.5 8923316 04:02 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:53 47740 45339 116.3 34.1 8583212 04:03 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:54 47740 45339 108.6 31.7 7973128 04:04 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:55 47740 45339 255.5 31.7 7971420 04:05 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:56 47740 45339 162.2 31.3 7869952 04:06 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:57 47740 45339  72.3 31.4 7910644 04:07 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:58 47740 45339 239.5 32.0 8051296 04:08 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:02:59 47740 45339 329.1 32.0 8044528 04:09 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:00 47740 45339 309.7 26.3 6628332 04:10 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:01 47740 45339 283.8 23.2 5850840 04:11 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:02 47740 45339 279.7 22.0 5539844 04:12 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:03 47740 45339 182.8 21.9 5499852 04:13 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:04 47740 45339 204.6 21.8 5489476 04:14 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:05 47740 45339 255.8 21.9 5509340 04:15 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:06 47740 45339 280.8 21.8 5478600 04:16 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:07 47740 45339 269.1 21.6 5426076 04:17 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:08 47740 45339 207.7 21.5 5410220 04:18 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:10 47740 45339 135.8 21.7 5458160 04:20 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:11 47740 45339 203.1 21.5 5416264 04:21 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:12 47740 45339   5.0 21.5 5415604 04:22 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:13 47740 45339 362.6 21.4 5393684 04:23 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:14 47740 45339 350.0 21.1 5318072 04:24 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:15 47740 45339 323.9 20.9 5262552 04:25 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:16 47740 45339 308.1 20.7 5207040 04:26 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:17 47740 45339 266.2 20.9 5248512 04:27 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:18 47740 45339 269.6 20.9 5266808 04:28 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:19 47740 45339 227.1 21.0 5291212 04:29 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:20 47740 45339 444.6 21.0 5277260 04:30 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:21 47740 45339 228.1 20.9 5267124 04:31 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+
+04:03:22 47740 45339 246.7 21.1 5304556 04:32 /Users/rufus/Developer/VIctory-macOS/target/x86_64-pc-windows-gnullvm/release/victory.exe
+========== MAC HARDWARE TELEMETRY ==========
+Machine model: Mac17,3
+OS version: 25G332
+Boot arguments: 
+Boot time: Fri Nov 27 01:36:43 2026
+
+Second underflow occured.
+
+
+*** Sampled system activity (Sat Nov 28 04:07:50 2026 +0000) (1010.96ms elapsed) ***
+
+*** Running tasks ***
+
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+MTLCompilerService                 48700  2130.34   99.68  0.00    0.00               0.00    0.00              5379.75         
+wine                               48560  2263.81   95.34  833.82  0.00               1423.32 0.00              3999.35         
+MTLCompilerService                 48695  703.16    99.62  0.00    0.00               0.00    0.00              1769.02         
+ReportCrash                        724    997.73    99.75  0.00    0.00               0.00    0.00              953.10          
+DEAD_TASKS                         -1     113.67    63.23  0.00    0.00               0.99    0.00              72.58           
+Terminal                           34273  33.30     88.96  0.00    0.00               19.78   0.00              71.45           
+wineserver                         48663  52.47     34.69  1242.32 0.00               1242.32 0.00              48.75           
+coreaudiod                         178    45.69     97.61  0.00    0.00               86.05   0.00              27.77           
+WindowServer                       166    51.43     76.05  32.64   0.00               229.47  0.00              23.35           
+powermetrics                       48871  11.05     14.47  0.00    0.00               0.99    0.00              19.21           
+kernel_task                        0      21.04     0.00   519.28  0.00               1154.29 0.00              10.27           
+mds                                123    11.15     47.13  0.00    0.00               28.68   0.00              5.85            
+wine                               48675  9.50      53.97  811.07  0.00               812.06  0.00              4.91            
+mds_stores                         327    6.99      57.30  0.00    0.00               0.00    0.00              4.04            
+wine                               48677  2.50      42.44  0.00    0.00               0.00    0.00              2.62            
+backgroundtaskmanagementd          314    3.77      58.90  0.00    0.00               0.00    0.00              2.59            
+mdworker_shared                    48868  3.96      63.31  0.00    0.00               0.00    0.00              2.39            
+trustd                             415    2.74      89.11  0.00    0.00               0.00    0.00              1.88            
+mdworker_shared                    48854  3.05      62.86  0.00    0.00               0.00    0.00              1.85            
+smd                                95     2.48      63.87  0.00    0.00               0.00    0.00              1.62            
+launchd                            1      1.74      46.04  0.00    0.00               0.00    0.00              1.37            
+Activity Monitor                   12994  2.35      84.07  0.00    0.00               4.95    0.00              1.19            
+fseventsd                          98     2.20      52.86  0.00    0.99               32.64   0.00              1.01            
+contextstored                      133    1.15      60.00  0.00    0.00               0.00    0.00              0.58            
+AppleCentauriAlpha                 359    1.29      63.00  0.00    0.00               15.83   0.00              0.51            
+Karabiner-Console-User-Server      1874   1.02      27.20  0.00    0.00               2.97    0.00              0.48            
+logd                               94     0.99      31.74  0.00    0.00               0.00    0.00              0.47            
+notifyd                            160    0.61      46.11  0.00    0.00               0.00    0.00              0.34            
+corebrightnessd                    162    0.65      51.35  0.00    0.00               0.00    0.00              0.28            
+distnoted                          149    0.47      42.37  0.00    0.00               0.99    0.00              0.26            
+Telegram                           13074  0.80      61.91  0.00    0.00               60.34   0.00              0.25            
+PerfPowerServices                  151    0.54      30.02  0.00    0.00               1.98    0.00              0.23            
+Finder                             473    0.35      69.46  0.00    0.00               0.00    0.00              0.22            
+distnoted                          427    0.36      72.84  0.00    0.00               0.99    0.00              0.20            
+Karabiner-Core-Service             1873   0.46      52.35  0.00    0.00               2.97    0.00              0.20            
+bluetoothd                         159    0.42      51.41  0.00    0.00               0.99    0.00              0.19            
+sysmond                            379    0.35      26.20  0.00    0.00               0.00    0.00              0.18            
+Microsoft Edge Helper (Aperitif    46158  0.44      76.28  0.00    0.00               1.98    0.00              0.16            
+DockHelper                         45118  0.31      19.46  0.00    0.00               0.99    0.00              0.15            
+Microsoft Edge                     45166  0.34      52.42  0.00    0.00               2.97    0.00              0.13            
+audioclocksyncd                    284    0.35      58.33  0.00    0.00               0.00    0.00              0.12            
+Microsoft Edge Helper (Aperitif)   45176  0.29      42.65  0.00    0.00               0.99    0.00              0.11            
+Microsoft Edge Helper (Aperitif    45189  0.20      5.53   0.00    0.00               0.99    0.00              0.09            
+airportd                           214    0.22      54.59  0.00    0.00               2.97    0.00              0.09            
+Microsoft Edge Helper (Aperitif)   45175  0.13      7.05   0.00    0.00               0.99    0.00              0.07            
+distnoted                          330    0.13      15.36  0.00    0.00               0.99    0.00              0.06            
+duetexpertd                        540    0.17      57.95  0.00    0.00               0.00    0.00              0.06            
+WhatsApp                           23964  0.20      62.66  0.00    0.00               10.88   0.00              0.06            
+distnoted                          339    0.12      16.89  0.00    0.00               0.99    0.00              0.06            
+AppleCentauriBeta                  361    0.13      58.56  0.00    0.00               2.97    0.00              0.05            
+distnoted                          350    0.10      19.12  0.00    0.00               0.99    0.00              0.05            
+distnoted                          230    0.10      27.29  0.00    0.00               0.99    0.00              0.05            
+distnoted                          22581  0.10      22.80  0.00    0.00               0.99    0.00              0.05            
+distnoted                          202    0.09      21.95  0.00    0.00               0.99    0.00              0.05            
+distnoted                          208    0.09      22.70  0.00    0.00               0.99    0.00              0.04            
+opendirectoryd                     135    0.11      60.01  0.00    0.00               0.00    0.00              0.04            
+distnoted                          376    0.09      20.28  0.00    0.00               0.99    0.00              0.04            
+distnoted                          386    0.09      19.87  0.00    0.00               0.99    0.00              0.04            
+distnoted                          15942  0.09      22.60  0.00    0.00               0.99    0.00              0.04            
+systemstats                        102    0.09      45.65  0.00    0.00               0.00    0.00              0.04            
+distnoted                          346    0.08      22.26  0.00    0.00               0.99    0.00              0.04            
+distnoted                          486    0.08      21.11  0.00    0.00               0.99    0.00              0.04            
+distnoted                          292    0.08      22.44  0.00    0.00               0.99    0.00              0.04            
+fileproviderd                      499    0.11      53.27  0.00    0.00               2.97    0.00              0.04            
+distnoted                          321    0.08      23.00  0.00    0.00               0.99    0.00              0.04            
+Microsoft Edge Helper (Aperitif)   45185  0.11      8.65   0.00    0.00               0.99    0.00              0.04            
+distnoted                          1244   0.08      23.55  0.00    0.00               0.99    0.00              0.04            
+distnoted                          694    0.08      22.01  0.00    0.00               0.99    0.00              0.04            
+distnoted                          772    0.08      22.95  0.00    0.00               0.99    0.00              0.04            
+cfprefsd                           169    0.09      20.63  0.00    0.00               0.00    0.00              0.04            
+diskarbitrationd                   126    0.07      66.26  0.00    0.00               0.00    0.00              0.03            
+thermalmonitord                    132    0.08      41.54  0.00    0.00               0.99    0.00              0.03            
+gamecontrollerd                    44260  0.08      39.38  0.00    0.00               0.99    0.00              0.03            
+Microsoft Edge Helper (Aperitif    45195  0.10      89.93  0.00    0.00               1.98    0.00              0.03            
+symptomsd                          261    0.08      47.65  0.00    0.00               0.99    0.00              0.03            
+LinearMouse                        582    0.05      22.25  0.00    0.00               0.99    0.00              0.03            
+universalaccessd                   439    0.06      54.01  0.00    0.00               0.99    0.00              0.03            
+lsd                                448    0.06      49.89  0.00    0.00               0.00    0.00              0.02            
+cfprefsd                           428    0.05      40.72  0.00    0.00               0.00    0.00              0.02            
+cameracaptured                     305    0.05      33.71  0.00    0.00               2.97    0.00              0.02            
+locationd                          142    0.05      54.52  0.00    0.00               0.99    0.00              0.02            
+replayd                            44316  0.04      12.60  0.00    0.00               0.99    0.00              0.02            
+amsaccountsd                       566    0.03      16.89  0.00    0.00               0.99    0.00              0.02            
+ControlCenter                      469    0.03      28.83  0.00    0.00               0.99    0.00              0.01            
+Spotlight                          571    0.02      29.09  0.00    0.00               0.99    0.00              0.01            
+launchservicesd                    137    0.03      47.21  0.00    0.00               0.00    0.00              0.01            
+loginwindow                        170    0.03      27.73  0.00    0.00               0.99    0.00              0.01            
+remindd                            33554  0.02      42.05  0.00    0.00               0.99    0.00              0.01            
+PasswordBreachAgent                2102   0.02      49.48  0.00    0.00               0.99    0.00              0.01            
+sharingd                           536    0.02      69.84  0.00    0.00               0.00    0.00              0.01            
+wifip2pd                           33673  0.01      46.31  0.00    0.00               0.00    0.00              0.01            
+mDNSResponderHelper                307    0.01      46.88  0.00    0.00               0.99    0.00              0.00            
+maild                              44298  0.01      63.92  0.00    0.00               0.99    0.00              0.00            
+ALL_TASKS                          -2     6491.78   95.81  3439.30 0.99               5189.13 0.00              12413.45         
+
+**** Processor usage ****
+
+E-Cluster Online: 100%
+E-Cluster HW active frequency: 3035 MHz
+E-Cluster HW active residency: 100.00% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:  16% 3048 MHz:  84%)
+E-Cluster idle residency:   0.00%
+CPU 0 frequency: 3048 MHz
+CPU 0 active residency:  33.62% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  34%)
+CPU 0 idle residency:  66.38%
+CPU 1 frequency: 3048 MHz
+CPU 1 active residency:  50.49% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  50%)
+CPU 1 idle residency:  49.51%
+CPU 2 frequency: 3048 MHz
+CPU 2 active residency:  40.16% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  40%)
+CPU 2 idle residency:  59.84%
+CPU 3 frequency: 3048 MHz
+CPU 3 active residency:  52.06% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  52%)
+CPU 3 idle residency:  47.94%
+CPU 4 frequency: 3048 MHz
+CPU 4 active residency:  46.16% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  46%)
+CPU 4 idle residency:  53.84%
+CPU 5 frequency: 3048 MHz
+CPU 5 active residency:  35.25% (972 MHz:   0% 1152 MHz:   0% 1584 MHz:   0% 1992 MHz:   0% 2352 MHz:   0% 2700 MHz:   0% 2964 MHz:   0% 3048 MHz:  35%)
+CPU 5 idle residency:  64.75%
+
+S-Cluster HW active frequency: 3129 MHz
+S-Cluster HW active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+S-Cluster idle residency:   0.00%
+CPU 6 frequency: 3129 MHz
+CPU 6 active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU 6 idle residency:   0.00%
+CPU 7 frequency: 3129 MHz
+CPU 7 active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU 7 idle residency:   0.00%
+CPU 8 frequency: 3129 MHz
+CPU 8 active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU 8 idle residency:   0.00%
+CPU 9 frequency: 3129 MHz
+CPU 9 active residency: 100.00% (1308 MHz:   0% 1608 MHz:   0% 1932 MHz:   0% 2220 MHz:   0% 2508 MHz:   0% 2820 MHz:   0% 3072 MHz:  75% 3300 MHz:  25% 3516 MHz:   0% 3720 MHz:   0% 3876 MHz:   0% 4020 MHz:   0% 4176 MHz:   0% 4248 MHz:   0% 4272 MHz:   0% 4332 MHz:   0% 4428 MHz:   0% 4416 MHz:   0% 4464 MHz:   0%)
+CPU 9 idle residency:   0.00%
+
+CPU Power: 13779 mW
+GPU Power: 14 mW
+ANE Power: 0 mW
+Combined Power (CPU + GPU + ANE): 13793 mW
+
+
+**** Thermal pressure ****
+
+Current pressure level: Nominal
+
+**** GPU usage ****
+
+GPU HW active frequency: 338 MHz
+GPU HW active residency:   2.25% (338 MHz: 2.2% 486 MHz:   0% 636 MHz:   0% 796 MHz:   0% 888 MHz:   0% 988 MHz:   0% 1084 MHz:   0% 1182 MHz:   0% 1278 MHz:   0% 1374 MHz:   0% 1470 MHz:   0% 1578 MHz:   0%)
+GPU SW requested state: (P1 : 100% P2 :   0% P3 :   0% P4 :   0% P5 :   0% P6 :   0% P7 :   0% P8 :   0% P9 :   0% P10 :   0% P11 :   0% P12 :   0%)
+GPU idle residency:  97.75%
+GPU Power: 14 mW
+
+
+
+*** Sampled system activity (Sat Nov 28 04:07:51 2026 +0000) (1017.73ms elapsed) ***
+
+*** Running tasks ***
+
+Name                               ID     CPU ms/s  User%  Deadlines (<2 ms, 2-5 ms)  Wakeups (Intr, Pkg idle)  Energy Impact
+MTLCompilerService                 48700  2478.79   99.51  0.00    0.00               0.00    0.00              5821.94         
+wine                               48560  1773.28   95.83  838.20  0.00               1424.84 0.00              3460.28         
+MTLCompilerService                 48695  852.39    99.63  0.00    0.00               0.00    0.00              1994.21         
+ReportCrash                        724    1000.82   99.68  0.00    0.00               0.00    0.00              956.89          
+Terminal                           34273  30.86     89.12  0.00    0.00               23.58   0.00              66.25           
+wineserver                         48663  53.17     34.78  1260.74 0.00               1260.74 0.00              49.54           
+mdworker_shared                    48876  53.73     80.18  0.00    0.00               0.00    0.00              40.96           
+coreaudiod                         178    45.83     96.77  0.00    0.00               86.47   0.00              28.06           
+WindowServer                       166    48.46     75.00  29.48   0.00               224.04  0.00              22.10           
+powermetrics                       48871  11.71     15.89  0.00    0.00               0.98    0.00              20.78           
+mds_stores                         327    23.79     37.65  0.00    0.00               0.98    0.00              15.80           
+kernel_task                        0      18.75     0.00   520.80  0.00               1458.25 0.00              11.28           
+mds                                123    12.44     46.37  0.00    0.00               29.48   0.00              6.48            
+wine                               48675  9.59      54.47  807.74  0.00               807.74  0.00              5.01            
+mdworker_shared                    48854  5.00      64.72  0.00    0.00               0.00    0.00              3.01            
+DEAD_TASKS                         -1     4.26      49.77  0.00    0.00               0.00    0.00              2.64            
+audioanalyticsd                    338    3.72      73.62  0.00    0.00               0.00    0.00              2.64            
+wine                               48677  2.59      42.45  0.00    0.00               0.00    0.00              2.42            
+runningboardd                      171    3.80      39.69  0.00    0.00               0.98    0.00              2.10            
+xprotectd                          134    1.77      98.37  0.00    0.00               1.97    0.00              1.45            
+Activity Monitor                   12994  2.57      84.54  0.00    0.00               4.91    0.00              1.36            
+WhatsApp                           23964  2.68      28.58  0.00    0.00               14.74   0.00              1.32            
+launchd                            1      2.86      38.05  0.00    0.00               0.00    0.00              1.30            
+Finder                             473    2.36      36.68  0.00    0.00               3.93    0.00              1.25            
+mdworker_shared                    48769  1.97      60.40  0.00    0.00               0.00    0.00              1.24            
+mdworker_shared                    48868  1.95      64.12  0.00    0.00               0.00    0.00              1.20            
+fseventsd                          98     2.48      51.07  0.00    0.00               32.43   0.00              1.13            
+airportd                           214    1.87      62.88  0.00    0.00               2.95    0.00              1.04            
+AppleCentauriAlpha                 359    1.73      54.80  0.00    0.00               24.57   0.00              0.77            
+cfprefsd                           428    0.94      56.21  0.00    0.00               0.00    0.00              0.62            
+mdworker_shared                    48633  0.98      64.86  0.00    0.00               0.00    0.00              0.59            
+opendirectoryd                     135    1.19      47.88  0.00    0.00               0.00    0.00              0.55            
+contextstored                      133    1.04      61.61  0.00    0.00               0.00    0.00              0.50            
+dasd                               146    0.95      18.64  0.00    0.00               0.98    0.00              0.49            
+gamepolicyd                        588    0.90      24.01  0.00    0.00               0.00    0.00              0.44            
+logd                               94     0.93      29.43  0.00    0.00               0.00    0.00              0.42            
+cfprefsd                           169    0.69      63.05  0.00    0.00               0.00    0.00              0.41            
+wine                               48679  0.30      58.27  0.98    0.00               0.98    0.00              0.36            
+notifyd                            160    0.57      46.71  0.00    0.00               0.00    0.00              0.34            
+UIKitSystem                        543    0.70      13.50  0.00    0.00               0.00    0.00              0.31            
+corebrightnessd                    162    0.59      50.87  0.00    0.00               0.00    0.00              0.26            
+Telegram                           13074  0.83      58.54  0.00    0.00               60.92   0.00              0.26            
+nsurlsessiond                      458    0.55      16.83  0.00    0.00               0.00    0.00              0.26            
+diskarbitrationd                   126    0.46      66.94  0.00    0.00               0.00    0.00              0.26            
+powerd                             108    0.42      46.34  0.00    0.00               0.00    0.00              0.22            
+PerfPowerServices                  151    0.48      42.85  0.00    0.00               0.00    0.00              0.20            
+========== CPU PROFILE ==========
+Analysis of sampling wine (pid 47740) every 10 milliseconds
+Process:         victory.exe [47740]
+Path:            /Users/*/wine
+Load Address:    0x200000000
+Identifier:      wine
+Version:         0
+Code Type:       X86-64 (translated)
+Platform:        macOS
+Parent Process:  zsh [45339]
+Target Type:     live task
+
+Date/Time:       2026-11-28 4:02:53.465 am +0000
+Launch Time:     2026-11-28 3:58:50.914 am +0000
+OS Version:      macOS 26.7.2 (25G332)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         13.3G
+Physical footprint (peak):  13.5G
+Idle exit:                  untracked
+----
+
+Call graph:
+    857 Thread_1660834   DispatchQueue_1: com.apple.main-thread  (serial)
+    + 857 start  (in dyld) + 3240  [0x7ff1022511d8]
+    +   857 ???  (in wine)  load address 0x200000000 + 0xae3  [0x200000ae3]
+    +     857 __wine_main  (in ntdll.so) + 463  [0x20869e2ff]  loader.c:2636
+    +       857 CFRunLoopRun  (in CoreFoundation) + 40  [0x7ff80a19a9cc]
+    +         857 _CFRunLoopRunSpecificWithOptions  (in CoreFoundation) + 496  [0x7ff80a1f0775]
+    +           857 __CFRunLoopRun  (in CoreFoundation) + 920  [0x7ff80a128b4b]
+    +             857 __CFRunLoopDoSources0  (in CoreFoundation) + 203  [0x7ff80a129e75]
+    +               857 __CFRunLoopDoSource0  (in CoreFoundation) + 157  [0x7ff80a12a0c1]
+    +                 857 __CFRUNLOOP_IS_CALLING_OUT_TO_A_SOURCE0_PERFORM_FUNCTION__  (in CoreFoundation) + 17  [0x7ff80a12a11e]
+    +                   857 run_cocoa_app  (in winemac.so) + 354  [0x20bf6c162]  cocoa_main.m:103
+    +                     857 -[NSApplication run]  (in AppKit) + 472  [0x7ff80df0885c]
+    +                       857 -[NSApplication(NSEventRouting) nextEventMatchingMask:untilDate:inMode:dequeue:]  (in AppKit) + 67  [0x7ff80ebc5951]
+    +                         857 -[NSApplication(NSEventRouting) _nextEventMatchingEventMask:untilDate:inMode:dequeue:]  (in AppKit) + 1265  [0x7ff80ebc5e7b]
+    +                           857 _DPSNextEvent  (in AppKit) + 800  [0x7ff80df179c5]
+    +                             857 _DPSBlockUntilNextEventMatchingListInMode  (in AppKit) + 172  [0x7ff80e621f94]
+    +                               857 _BlockUntilNextEventMatchingListInMode  (in HIToolbox) + 37  [0x7ff81743b0ca]
+    +                                 857 ReceiveNextEventCommon  (in HIToolbox) + 599  [0x7ff8172b2c4d]
+    +                                   857 RunCurrentEventLoopInMode  (in HIToolbox) + 283  [0x7ff8172afb8b]
+    +                                     857 _CFRunLoopRunSpecificWithOptions  (in CoreFoundation) + 496  [0x7ff80a1f0775]
+    +                                       854 __CFRunLoopRun  (in CoreFoundation) + 1358  [0x7ff80a128d01]
+    +                                       ! 854 __CFRunLoopServiceMachPort  (in CoreFoundation) + 145  [0x7ff80a12a25a]
+    +                                       !   854 mach_msg  (in libsystem_kernel.dylib) + 19  [0x7ff80a02ae56]
+    +                                       !     854 mach_msg_overwrite  (in libsystem_kernel.dylib) + 586  [0x7ff80a031b66]
+    +                                       !       854 mach_msg2_internal  (in libsystem_kernel.dylib) + 83  [0x7ff80a038f57]
+    +                                       !         854 ???  (in <unknown binary>)  [0x7ff89656b6b4]
+    +                                       !           854 ???  (in <unknown binary>)  [0x7ff895f9ab80]
+    +                                       2 __CFRunLoopRun  (in CoreFoundation) + 2390  [0x7ff80a129109]
+    +                                       ! 2 __CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE__  (in CoreFoundation) + 9  [0x7ff80a1647be]
+    +                                       !   2 _dispatch_main_queue_callback_4CF  (in libdispatch.dylib) + 31  [0x7ff809ec1d4b]
+    +                                       !     2 _dispatch_main_queue_drain  (in libdispatch.dylib) + 107  [0x7ff809ec1dc4]
+    +                                       !       2 _dispatch_main_queue_drain.cold.6  (in libdispatch.dylib) + 842  [0x7ff809ee6679]
+    +                                       !         2 _dispatch_client_callout  (in libdispatch.dylib) + 6  [0x7ff809ecb8b2]
+    +                                       !           2 _dispatch_call_block_and_release  (in libdispatch.dylib) + 12  [0x7ff809eb5616]
+    +                                       !             1 __23-[WineDisplayLink fire]_block_invoke  (in winemac.so) + 294  [0x20bf6de26]  cocoa_window.m:275
+    +                                       !             : 1 -[WineWindow displayIfNeeded]  (in winemac.so) + 94  [0x20bf759de]  cocoa_window.m:2766
+    +                                       !             :   1 -[NSWindow displayIfNeeded]  (in AppKit) + 155  [0x7ff80dfd624e]
+    +                                       !             :     1 NSViewUpdateVibrancyForSubtree  (in AppKit) + 232  [0x7ff80dfd6400]
+    +                                       !             :       1 ???  (in <unknown binary>)  [0x7ff89bb477b8]
+    +                                       !             1 __23-[WineDisplayLink fire]_block_invoke  (in winemac.so) + 341  [0x20bf6de55]  cocoa_window.m:280
+    +                                       !               1 ???  (in <unknown binary>)  [0x7ff898b15eb8]
+    +                                       1 __CFRunLoopRun  (in CoreFoundation) + 1821  [0x7ff80a128ed0]
+    +                                         1 __CFRunLoopDoObservers  (in CoreFoundation) + 563  [0x7ff80a12955b]
+    +                                           1 __CFRUNLOOP_IS_CALLING_OUT_TO_AN_OBSERVER_CALLBACK_FUNCTION__  (in CoreFoundation) + 23  [0x7ff80a12962f]
+    +                                             1 CFRunLoopTimerSetNextFireDate  (in CoreFoundation) + 387  [0x7ff80a164044]
+    +                                               1 __CFRunLoopCopyMode  (in CoreFoundation) + 176  [0x7ff80a1f029a]
+    +                                                 1 _CFRuntimeSetInstanceTypeIDAndIsa  (in CoreFoundation) + 18  [0x7ff80a0b2d12]
+    +                                                   1 ???  (in <unknown binary>)  [0x7ff896629b80]
+    857 Thread_1660835: com.apple.rosetta.exceptionserver
+    + 850 ???  (in Rosetta Runtime Routines)  [0x7ff7ffee0ed0]
+    + 6 ???  (in Rosetta Runtime Routines)  [0x7ff7ffee0d98]
+    + 1 ???  (in Rosetta Runtime Routines)  [0x7ff7ffee6458]
+    857 Thread_1660836: main
+    + 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                 857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                   857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                     857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                       857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                         857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                           857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                             857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+    +                                                                                                                               857 __wine_syscall_dispatcher  (in ntdll.so) + 389  [0x2086b34a5]
+========== MEMORY PRESSURE ==========
+The system has 25769803776 (1572864 pages with a page size of 16384).
+System-wide memory free percentage: 75%
+rufus@Anthracite ~ % 
