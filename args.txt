@@ -1,0 +1,6 @@
+VICTORY_FAULT_TRACKING=1 \
+VICTORY_PATCH_MASKED=all \
+VICTORY_PATCH_WIDE="$PWD/runtime-patches/victory-wide-sites.txt" \
+VICTORY_PATCH_WIDE_DIR="$PWD/runtime-patches/victory-wide-dlls" \
+VICTORY_FLIGHT1=1 \
+./Launch.sh
