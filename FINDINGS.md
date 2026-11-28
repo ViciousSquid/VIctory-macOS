@@ -25,7 +25,7 @@ A Rosetta synchronous-exception message occurred at the end of the baseline capt
 A follow-up run on 2026-11-28 enabled fault tracking under Rosetta. Startup confirmed tracking was on and reported **1,242 stores patched** for the Series 1.0.2.1 image. Rosetta then faulted inside the main image at RVA **0x22F7E6**, on a sequence of unaligned 256-bit `vmovups` stores. A subsequent run was launched with that site and the next store site added to the explicit patch list; its next reported exception was at RVA **0x22F7F4**, 14 bytes later, on a third `vmovups` store. The follow-up's final startup patch count has not yet been supplied, so application of both additional patches remains to be verified.
 
 
-**Latest 2026-11-28 follow-up:** the main-image wide-store list was applied at runtime (**117,413 patched / 0 refused**). The recurring external-to-main-image RIP was attributed to title-owned `xboxbvhbuilder.dll` at RVA `0x14B2F`; a per-DLL list was applied (**122 patched / 0 refused**) through `VICTORY_PATCH_WIDE_DIR`. Fault tracking was on and 1,234 masked stores were patched. The user reported continued visible frames and no later Rosetta exception in the inspected log, but performance remains poor and variable (0.2–2.7 FPS in the supplied reports). See `9.
+**Latest 2026-11-28 follow-up:** the main-image wide-store list was applied at runtime (**117,413 patched / 0 refused**). The recurring external-to-main-image RIP was attributed to title-owned `xboxbvhbuilder.dll` at RVA `0x14B2F`; a per-DLL list was applied (**122 patched / 0 refused**) through `VICTORY_PATCH_WIDE_DIR`. Fault tracking was on and 1,234 masked stores were patched. The user reported continued visible frames and no later Rosetta exception in the inspected log, but performance remains poor and variable (0.2–2.7 FPS in the supplied reports). See section 9.
 
 ## 1. Test identity and startup facts
 
@@ -525,6 +525,13 @@ The following implementation files explain the mechanisms discussed above:
 - [`crates/victory-shader/src/emit/mesh_size.rs`](crates/victory-shader/src/emit/mesh_size.rs) and [`crates/victory-gpu/src/pipeline/host.rs`](crates/victory-gpu/src/pipeline/host.rs) — Metal mesh-output sizing and over-limit rejection.
 - [`crates/victory-gpu/src/pipeline/schedule.rs`](crates/victory-gpu/src/pipeline/schedule.rs) and [`crates/victory-gpu/src/pipeline/make.rs`](crates/victory-gpu/src/pipeline/make.rs) — asynchronous host-pipeline workers, wait budgets, and dropped draws.
 
+
+### Additional source locations for the 01:03–01:29 follow-up
+
+- [`crates/victory-loader/src/windows.rs`](crates/victory-loader/src/windows.rs) — maps title-owned DLLs and applies per-image lists from `VICTORY_PATCH_WIDE_DIR/<first-16-hex-of-image-hash>.txt`.
+- [`crates/victory-gpu/src/shadow.rs`](crates/victory-gpu/src/shadow.rs) — low-memory release of idle title-memory host copies and the recreated-copy counter.
+- [`crates/victory-gpu/src/texture.rs`](crates/victory-gpu/src/texture.rs) — texture detiling, staging buffers, and refresh work.
+
 ---
 
 **Revision note:** The tested local revision was `8791724`. The repository's `main` branch subsequently advanced to `648d0851` with two commits affecting only `Launch.sh`; the source files used for this analysis were unchanged in that comparison. This document is being added to the current `main` branch.
@@ -533,7 +540,7 @@ The following implementation files explain the mechanisms discussed above:
 
 ## 9. Latest follow-up — title-DLL fault patched; performance remains poor (2026-11-28 01:03–01:29 UTC)
 
-This section records the current state after applying the generated wide-store list to both the main executable and the identified title-owned DLL. It supersedes the earlier “next experiment” status in ``7–8: both patch lists have now been applied and verified at runtime.
+This section records the current state after applying the generated wide-store list to both the main executable and the identified title-owned DLL. It supersedes the earlier “next experiment” status in sections 7 and 8: both patch lists have now been applied and verified at runtime.
 
 ### 9.1. Attribution of the recurring Rosetta exception
 
