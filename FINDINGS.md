@@ -1,620 +1,230 @@
-# VIctory macOS — investigation findings
+# VIctory macOS — Rosetta runtime findings
 
-**Baseline date:** 2026-11-27 (UTC); **Rosetta follow-up:** 2026-11-28 00:10–00:16 UTC  
-**Wide-store-list follow-up:** 2026-11-28 (after the 00:26 UTC exception)  
-**Executable SHA-256:** `b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93`  
-**Tested source revision:** `87917243b0560571e9ff8ab39479031cc5e4b70c` (`8791724`)  
-**Baseline log:** `/tmp/victory-warm.log`, approximately 23:30–23:31 UTC  
-**Follow-up logs:** `/tmp/victory-tracking.log` and `/tmp/victory-rva-test.log` (the latter supplied only in part)  
-**Purpose:** Record the observed macOS/Rosetta run, correlate it with the implementation, and distinguish confirmed causes from open questions.
+**Updated:** 2026-11-28  
+**Platform:** Apple M5 MacBook Air, 24 GB unified memory, macOS Tahoe  
+**Game build:** 1.0.2.1  
+**Game executable SHA-256:** \`b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93\`  
+**Investigation source revision:** \`87917243b0560571e9ff8ab39479031cc5e4b70c\` (\`8791724\`)  
 
-INVESTIGATION RECORD:  Apple M5 Air 2026 | 24GB unified RAM 
+----
+
+branch: https://github.com/ViciousSquid/VIctory-macOS/tree/patch/runtime-patch-data works at 4FPS on Macbook Air M5 
+
+run VIctory's `setup.sh` first
+then use `Launch.sh` and select the EXE
+
+----
+
+
+## Current result
+
+**The game now runs with visible rendered frames without the recurring Rosetta crash, at approximately 4 FPS.** This is the latest user-reported runtime result.
+
+The change that got past the recurring crash was to enable fault-based title-memory tracking and apply generated wide-store patch lists to both the main executable and the title-owned \`xboxbvhbuilder.dll\`.
+
+The runtime confirmed that the generated lists were applied:
+
+| Runtime patch path | Sites applied | Refused |
+|---|---:|---:|
+| Main executable — masked/vector-store patcher | 1,234 | No refused count in the supplied summary |
+| Main executable — generated wide-store list | 117,413 | 0 |
+| \`xboxbvhbuilder.dll\` — generated DLL wide-store list | 122 | 0 |
+
+The two generated wide-store manifests contain **117,535 entries** in total. They are contributed upstream in [PR #656](https://github.com/pragyaangaur/VIctory-macOS/pull/656).
+
+This is a meaningful change in execution status: the earlier run repeatedly stopped on Rosetta synchronous exceptions; with both wide-store lists applied, the inspected log no longer contained a later \`rosetta error:\` line, actual frames were visible, and the latest run remained active at about 4 FPS.
+
+The crash issue is therefore **mitigated for the tested build and observed run**, not proven impossible in every scene or future session. Performance is still poor. A 4 FPS result is approximately 250 ms per frame and is not yet a usable performance target.
 
 ## Executive summary
 
-The run gets substantially into the game startup and world rendering. Victory creates and uses D3D12 host pipelines, translates shaders, processes DirectStorage reads, and submits GPU work. The supplied log also contains host mesh-pipeline creation and frame reports. The user-visible window remained black while game audio was audible.
+The investigation began with the game reaching world startup but rendering either a black window with audio or extremely slowly. Initial frame reports were approximately **0.1–0.2 FPS**, with multi-second frame times and very large title-memory copy volumes.
 
-The world-stage reports show a severe performance collapse: approximately **0.2 FPS** and then **0.1 FPS**, with frame times of **4.38 s** and **7.95 s**. Host preparation is dominated by title-memory copies and texture preparation. The two reports account for approximately **27.0 GB** and **28.1 GB** of title-memory copy traffic per reported frame, plus approximately **4.8 GB** and **7.4 GB** of texture-preparation traffic.
+The first run had fault-based title-memory tracking disabled. Victory consequently refreshed title-memory copies wholesale rather than relying on changed-page tracking. The supplied baseline reports showed approximately **27–28 GB of title-memory copy traffic per reported frame**, alongside expensive texture preparation.
 
-The strongest source-backed performance lead is already present in the startup output: **fault-based memory tracking was off**. Under Rosetta, that means title-memory copies are refreshed wholesale rather than using the normal changed-page tracking path. The source documents this fallback and warns that it can reach tens of gigabytes per world frame.
+Enabling fault tracking exposed a Rosetta limitation: certain unaligned 256-bit AVX stores could not be resumed after a guarded-page synchronous exception. The faults were not limited to the main executable. One recurring fault was attributed to the title-owned \`xboxbvhbuilder.dll\`.
 
-There are also shader-compatibility losses: some wave64 operations cannot be lowered safely onto a 32-lane host, and at least one mesh shader exceeded Metal's 32,768-byte output limit. These are separate from the memory-copy bottleneck.
+The investigation moved from chasing individual faulting instruction addresses to generating complete wide-store manifests for the relevant images. At runtime, Victory's existing patcher split the listed 256-bit stores into 128-bit halves. The main-image list applied 117,413 sites, and the DLL list applied 122 sites, both with zero refusals.
 
-A Rosetta synchronous-exception message occurred at the end of the baseline capture. Its cause was **not established** at that stage. In particular, fault tracking was off in that baseline, so the guarded-page failure mode documented for tracking-enabled runs could not explain that exception without further evidence.
+After both lists were active, the observed process progressed into actual rendering without the previously recurring Rosetta exception. The current user-reported result is approximately 4 FPS. The primary remaining task is now performance profiling, not further speculative fault-site patching.
 
-A follow-up run on 2026-11-28 enabled fault tracking under Rosetta. Startup confirmed tracking was on and reported **1,242 stores patched** for the Series 1.0.2.1 image. Rosetta then faulted inside the main image at RVA **0x22F7E6**, on a sequence of unaligned 256-bit `vmovups` stores. A subsequent run was launched with that site and the next store site added to the explicit patch list; its next reported exception was at RVA **0x22F7F4**, 14 bytes later, on a third `vmovups` store. The follow-up's final startup patch count has not yet been supplied, so application of both additional patches remains to be verified.
+## 1. Test identity and baseline behaviour
 
-
-**Latest 2026-11-28 follow-up:** the main-image wide-store list was applied at runtime (**117,413 patched / 0 refused**). The recurring external-to-main-image RIP was attributed to title-owned `xboxbvhbuilder.dll` at RVA `0x14B2F`; a per-DLL list was applied (**122 patched / 0 refused**) through `VICTORY_PATCH_WIDE_DIR`. Fault tracking was on and 1,234 masked stores were patched. The user reported continued visible frames and no later Rosetta exception in the inspected log, but performance remains poor and variable (0.2–2.7 FPS in the supplied reports). See section 9.
-
-## 1. Test identity and startup facts
-
-The startup output identifies the executable as:
+The tested executable was identified as:
 
 - **Game build:** Series 1.0.2.1
-- **Executable hash:** `b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93`
-- **Mapped image base:** `0x6fffed550000`
-- **Preferred image base:** `0x140000000`
-- **CLWB handling:** 8 loops were made NOPs.
+- **SHA-256:** \`b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93\`
+- **Main image base in the captured runs:** \`0x6fffed550000\`
+- **Preferred image base:** \`0x140000000\`
+- **CLWB handling:** eight loops were made NOPs.
 
-The loader scanned the executable and found **1,234 instruction candidates** in executable sections:
+The initial warm log showed that Victory was doing substantial work before the rendering failure:
 
-| Instruction | Count |
-|---|---:|
-| `vpmaskmovd` | 789 |
-| `vpmaskmovq` | 160 |
-| `vmaskmovps` | 180 |
-| `vmaskmovpd` | 1 |
-| `vcvtps2ph` | 70 |
-| `vextractf128` | 33 |
-| `vextracti128` | 1 |
-| **Total** | **1,234** |
+- D3D12 host pipelines were being created.
+- Shader translation was progressing.
+- DirectStorage read batches were completing.
+- Host mesh pipelines were being created.
+- The game reached world-stage frame reports.
 
-This is a scan count, **not** a count of instructions that faulted or were patched. The startup excerpt does not show a subsequent `masked stores N patched to plain stores` line or a `wide stores` patch summary.
+The window was initially black while audio was audible. The early frame reports showed approximately 0.2 FPS and 0.1 FPS, with frame times of 4.38 seconds and 7.95 seconds.
 
-The scan is relevant because the loader has machinery to replace selected AVX stores with trampolines that perform equivalent plain stores. That machinery exists to let Rosetta resume writes that cross protected-page boundaries. It does not follow that all 1,234 matches are problematic during this run.
+Those early samples also reported approximately 27,018.7 MB and 28,092.7 MB of title-memory copies per frame. This was the key performance lead before the Rosetta fault-tracking work began.
 
-## 2. Fault-based title-memory tracking
+## 2. Why fault tracking mattered
 
-Startup explicitly reported:
+The initial startup explicitly reported:
 
-```text
+~~~text
 fault tracking off (title memory copied whole;
 VICTORY_FAULT_TRACKING=1 turns it on, which also patches the stores Rosetta cannot resume)
-```
+~~~
 
-This is a confirmed setting for this run.
+Victory's normal title-memory tracking uses guarded 64 KiB pages to identify which pages have changed. The host can then refresh only the changed portions of title memory instead of copying every tracked range wholesale.
 
-### Why it matters
+With fault tracking off, the supplied baseline logs show very large copy volumes. Enabling tracking was therefore important for reducing memory-copy overhead, but it also required the runtime to deal with Rosetta's inability to resume certain AVX stores after a synchronous page fault.
 
-Victory's normal tracking design tracks changed **64 KiB pages**. When a tracked page is first written, the page guard reports the change so host copies only need to refresh changed pages. This avoids repeatedly copying the full range of every title-memory shadow.
+The relevant implementation is in:
 
-Under Rosetta, fault-based tracking is disabled by default because Rosetta has known limitations resuming certain x86 AVX stores after a synchronous page fault. The relevant implementation is in:
+- \`crates/victory-gpu/src/watch.rs\` — fault-tracking selection, Rosetta detection and store-patching requirement.
+- \`crates/victory-loader/src/masked.rs\` — masked/vector-store scanning and trampoline patching.
+- \`crates/victory-loader/src/wide.rs\` — validation and runtime splitting of plain 256-bit stores.
+- \`apps/victory/src/run.rs\` — startup selection, patch configuration and diagnostics.
 
-- `crates/victory-gpu/src/watch.rs` — `fault_tracking()`, `rosetta()`, and `stores_need_patching()`.
-- `crates/victory-loader/src/masked.rs` — scanner, instruction decoder, and trampoline patcher for masked/vector stores.
-- `apps/victory/src/run.rs` — startup reporting and selection of patches for the title image.
+Fault tracking does not mean every title-memory range becomes page-tracked. Some memory remains on whole-range copy paths, so tracking is not expected to eliminate all memory-copy work.
 
-When tracking is off, the implementation falls back to copying title memory wholesale. The source comments document that this can cost tens of gigabytes per world frame; the loader's masked-store module documents a prior world-streaming case of roughly 129 GB per frame. That 129 GB is a source-documented prior observation, **not** a measurement from this particular capture.
+## 3. Rosetta fault investigation
 
-### Correlation with this run
-
-The warm log reports approximately:
-
-- **27,018.7 MB** of title-memory copies in the frame report around frame 1611.
-- **28,092.7 MB** in the report around frame 1612.
-
-That is consistent with the wholesale-copy fallback being a major contributor to the observed CPU preparation cost. The log does not yet establish how much of the copied range is avoidable, how much comes from memory outside Victory's write-watched pools, or what the performance would be with tracking enabled.
-
-The startup code supports the opt-in:
-
-```bash
-VICTORY_FAULT_TRACKING=1
-```
-
-When enabled under Rosetta, `stores_need_patching()` becomes true. For this exact Series 1.0.2.1 executable hash, `apps/victory/src/run.rs` also adds eight known RVAs for plain 256-bit vector stores to the automatic patch selection. The explicit `VICTORY_PATCH_MASKED` setting can override the automatic selection.
-
-**The 2026-11-27 baseline did not validate this switch.** A 2026-11-28 follow-up did enable it and startup confirmed `fault tracking on`, but that run subsequently hit a Rosetta exception at a plain 256-bit store. This does not establish that the tracking-enabled configuration is stable on this machine. The source records earlier Rosetta failures involving wide stores, so each patch experiment must be checked against the startup patch count and a fresh log.
-
-A further distinction: only the runtime's GPU memory pools, physical-page views, and placeholders participate in this page tracking design. Other memory ranges (including some C-heap memory) are still copied whole. Enabling tracking therefore does not promise zero whole-range copies.
-
-## 3. GPU and frame-time measurements
-
-The supplied warm log contains two particularly useful frame reports.
-
-### Report around frame 1611 — 23:30:54 UTC
-
-| Metric | Reported value |
-|---|---:|
-| FPS | 0.2 |
-| Frame time | 4,375.4 ms |
-| Preparing time | 3,794.5 ms |
-| Title-memory copies | 4,263.7 ms / 27,018.7 MB |
-| Texture preparation | 1,744.4 ms / 4,783.0 MB |
-| Host GPU time | 433.9 ms |
-| Copy-back | 57.9 ms / 15.7 MB |
-| Draws per frame | 3,053 |
-| Draws dropped without a host pipeline | 1,066 (0 being made) |
-| Indirect draws | 10 |
-| Root-view slots per frame | 1,011 |
-
-Host resource counters at this point:
-
-- 3,843 host textures, 3,118 MB in total; 2,373 MB used by lists.
-- 51 title textures sharing one host texture, saving 60 MB.
-- 24 texture heaps, 1,599 MB used and 11 MB free.
-- 13 depth-twin copies per frame.
-
-### Report around frame 1612 — 23:31:02 UTC
-
-| Metric | Reported value |
-|---|---:|
-| FPS | 0.1 |
-| Frame time | 7,950.8 ms |
-| Preparing time | 7,462.1 ms |
-| Title-memory copies | 6,521.7 ms / 28,092.7 MB |
-| Texture preparation | 6,071.4 ms / 7,421.0 MB |
-| Host GPU time | 409.8 ms |
-| Copy-back | 71.4 ms / 15.3 MB |
-| Draws per frame | 3,948 |
-| Draws dropped without a host pipeline | 410 (0 being made) |
-| Indirect draws | 21 |
-| Root-view slots per frame | 1,299 |
-
-Host resource counters at this point:
-
-- 3,915 host textures, 3,157 MB in total; 2,413 MB used by lists.
-- 25 texture heaps, 1,597 MB used and 81 MB free.
-- 20 depth-twin copies per frame.
-
-The preparation counters are per-frame averages over the reporting window. They are not unique allocations or a direct measurement of physical DRAM bandwidth. In particular, do not add every timing field together as though the categories were guaranteed to be disjoint.
-
-The queue diagnostics report no fence waits at present in these samples and very little time in the pump outside host submissions. They do report title-submission work running for approximately **4,258.6 ms** and **7,911.7 ms** per report frame. The host GPU times are approximately 434 ms and 410 ms respectively. This points to substantial work in both preparation/submission and GPU execution, rather than a simple fence-wait stall.
-
-DirectStorage continues to complete batches during the capture (examples include 254–495 requests per batch). This shows that streaming I/O is progressing; it does not prove that all world assets have finished loading.
-
-## 4. Shader translation and compatibility
-
-The session also produced shader diagnostics for wave64 operations on a host whose wave width is at most 32 lanes.
-
-The important nuance is that Victory does **not** simply reject every wave64 shader. The implementation in `crates/victory-shader/src/emit/lower/halves.rs` represents one console wave64 as two host waves of 32 lanes. It can lower several operations by exchanging values between the halves through group-shared memory and barriers.
-
-That exchange is only correct where the whole thread group can participate in the required synchronization. Operations that need cross-half information in divergent or otherwise unsafe control flow are refused. The source describes specific cases, including cross-half lane reads, lane masks, first-lane reads, reductions, and LDS sharing without a suitable group barrier.
-
-Consequently, the relevant diagnosis is **specific wave64 shader operations remain unsupported in some control-flow/synchronization contexts**, not that wave64 as a whole is impossible on the host.
-
-The pipeline log also reported a mesh-shader output of **34,816 bytes** against a Metal limit of **32,768 bytes**. This shader exceeds the limit by 2,048 bytes (6.25%). The implementation in `crates/victory-shader/src/emit/mesh_size.rs` calculates the Metal-aligned output layout, and `crates/victory-gpu/src/pipeline/host.rs` uses the result to refuse an over-limit mesh pipeline. Other mesh pipelines were successfully created in the same session; this is a per-pipeline limitation, not evidence that all mesh shaders fail.
-
-These shader/pipeline refusals can remove individual draws or dispatches and contribute to missing visual output. They are separate issues from the wholesale title-memory copy cost.
-
-## 5. Host-pipeline scheduling and dropped draws
-
-Host pipelines are compiled asynchronously by worker threads. The source in `crates/victory-gpu/src/pipeline/schedule.rs` sets a default **500 ms graphics-pipeline wait budget per title frame** and a **10 s bounded compute-pipeline budget**. `crates/victory-gpu/src/pipeline/make.rs` documents that a draw/dispatch whose pipeline is not ready within its budget can be dropped; a pipeline that fails translation or host creation can also leave a draw without a host pipeline.
-
-The warm log reports:
-
-```text
-host pipelines all made *made*=187 *loaded*=1475 *started_early*=1574
-```
-
-It later reports 1,066 and 410 draws per frame dropped without a host pipeline, with `0 being made` at the time of the respective reports.
-
-The `0 being made` value means those missing pipelines were not counted as actively being built in those samples. It does **not** prove that every dropped draw was caused by a shader refusal: a pipeline can be missing for more than one reason. The relevant next diagnostic is to correlate dropped draws with translation refusals, host-pipeline refusal reasons, and pipeline-cache state.
-
-## 6. Rosetta synchronous exception
-
-At approximately 23:31:05 UTC the log ends with:
-
-```text
-rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6fffed474b2f
-arm_pc=0x7422909d34
-```
-
-The main executable image was reported mapped at `0x6fffed550000`. The exception RIP is **0xDB4D1 below** that base, so this address is not inside the mapped main executable image. The supplied output does not identify which module owns that address.
-
-This matters when triaging the exception:
-
-- The source documents this exact Rosetta error as a known failure when fault-based page tracking asks Rosetta to resume certain AVX stores after a guarded-page fault.
-- **Fault tracking was off in this run.** Therefore the specific Victory guarded-page tracking path was not enabled, and the capture does not establish it as the cause of this exception.
-- The executable contains many candidate AVX/vector stores, but the scan count alone does not show that any particular instruction faulted.
-- The exception appears near later pipeline activity in the log, but temporal proximity does not establish a GPU-pipeline cause.
-
-The exception remains an open investigation item. It needs module/stack attribution (and ideally a complete crash or diagnostic report) before assigning it to the game, Wine, Rosetta, or Victory.
-
-### 6.1. Tracking-enabled follow-up — 2026-11-28 00:10–00:16 UTC
-
-The follow-up used the same Series 1.0.2.1 executable hash:
-
-- **Executable SHA-256:** `b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93`
-- **Mapped image base:** `0x6fffed550000`
-- **Fault tracking:** explicitly reported `on`
-- **Masked/vector-store scan:** 1,234 candidates (789 `vpmaskmovd`, 160 `vpmaskmovq`, 180 `vmaskmovps`, 1 `vmaskmovpd`, 70 `vcvtps2ph`, 33 `vextractf128`, 1 `vextracti128`)
-- **First tracking-enabled patch count:** `1242 patched to plain stores`
-
-The 1,242 count is the observed loader output for the first tracking-enabled attempt. It is consistent with all 1,234 scanned sites plus the eight Series 1.0.2.1-specific wide-store RVAs selected automatically by `apps/victory/src/run.rs`.
-
-#### First tracking-enabled exception
-
-The first reported exception was:
-
-```text
-rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6fffed77f7e6
-x86 instruction bytes:
-  0xc4602444117cc1c4 0xc1c4402444117cc1
-```
-
-Subtracting the mapped image base gives:
-
-```text
-0x6fffed77f7e6 - 0x6fffed550000 = 0x22f7e6
-```
-
-The little-endian instruction bytes begin with two consecutive seven-byte AVX stores:
-
-```asm
-; RVA 0x22f7e6
-vmovups [r12+0x60], ymm0
-
-; RVA 0x22f7ed
-vmovups [r12+0x40], ymm0
-```
-
-These are plain, unaligned 256-bit stores. They are not included in the masked-store byte scan; `masked.rs` only tries to decode plain wide moves when their RVAs are explicitly supplied. The source documents that a 256-bit `vmovups` crossing from a writable page into a protected page can make Rosetta emit this synchronous-exception error.
-
-#### Second tracking-enabled exception
-
-A repeat command was provided with `0x22f7e6` and `0x22f7ed` added to the explicit `VICTORY_PATCH_MASKED` list, retaining `all` and the eight existing build-specific RVAs. The zsh job-termination line displayed `VICTORY_PATCH_MASKED=` with no visible value, but the subsequent startup summary confirms that the two additional RVAs were in fact included: it reported `1244 patched to plain stores`. The next supplied exception was:
-
-```text
-rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6fffed77f7f4
-arm_pc=0x20552cc50
-num_insts=3
-inst_index=2
-x86 instruction bytes:
-  0xe9782444117cc1c4 0x48df894900000117
-```
-
-Using the same image base:
-
-```text
-0x6fffed77f7f4 - 0x6fffed550000 = 0x22f7f4
-```
-
-The bytes at the reported RIP decode to:
-
-```asm
-; RVA 0x22f7f4
-vmovups [r12+0x78], ymm0
-```
-
-The new RIP is **14 bytes** after the first one. The observed addresses form a contiguous sequence of three seven-byte `vmovups` stores at RVAs `0x22f7e6`, `0x22f7ed`, and `0x22f7f4`. This spatial sequence is confirmed by the instruction bytes. It does **not** prove that execution moved past the first two stores in the same run, because the second run's explicit patch setting and startup patch count have not been verified.
-
-The user subsequently supplied the second attempt's startup summary: `fault tracking on`, mapped base `0x6fffed550000`, and `masked stores 1244 patched to plain stores`. This confirms the two explicitly named RVAs `0x22f7e6` and `0x22f7ed` were included in the patch set: 1,234 scanned stores + eight existing Series 1.0.2.1-specific wide-store RVAs + two additional named wide-store RVAs = **1,244**. The shell job line's apparently empty environment display was therefore misleading/incomplete; the loader's startup count is the authoritative confirmation. Adding `0x22f7f4` as another unique site makes the expected count **1,245**, assuming it decodes and patches successfully.
-
-The pipeline translation and host mesh-pipeline messages immediately after the second exception show that the log contains continuing worker activity around the failure. Their temporal proximity does not establish that mesh-pipeline creation caused the Rosetta exception.
-
-#### Interpretation
-
-- Fault tracking is now confirmed **on** in a tracking-enabled run, unlike the 2026-11-27 baseline.
-- The first new fault RIP is inside the mapped main executable image, at RVA `0x22f7e6`; it is not the previously observed baseline RIP below the main image base.
-- The failing instruction class matches the documented Rosetta limitation for unaligned 256-bit stores crossing a protected-page boundary.
-- The second observed RIP identifies another store at RVA `0x22f7f4` in the same contiguous instruction sequence.
-- The second run's startup count of 1,244 confirms that both additional sites, `0x22f7e6` and `0x22f7ed`, were included in the patch set.
-- No evidence yet establishes that this sequence contains only these three stores, or that patching this sequence will eliminate all Rosetta exceptions.
-
-#### Immediate follow-up
-
-1. Read the startup portion of `/tmp/victory-rva-test.log` and retain the lines for `fault tracking`, `mapped at`, `masked stores N patched to plain stores`, and any `not a masked store or a plain 256-bit store` warnings. Confirm whether the second run reports **1,244**.
-2. If the two earlier RVAs were confirmed patched, add `22f7f4` to the same explicit list for the next controlled run; the expected patch count then becomes **1,245**.
-3. Preserve each complete log separately. Do not replace the automatic eight-RVA list when setting `VICTORY_PATCH_MASKED`: an explicit value overrides the automatic selection, so it must continue to include `all` and all eight existing RVAs.
-4. If another store in this sequence faults, capture its RIP and bytes before adding further sites. Once the sequence is mapped, consider generating a complete wide-store site list for the relevant image rather than chasing one exception at a time.
-
-### 6.2. Next Rosetta exception — 2026-11-28
-
-A subsequent tracking-enabled run ended with:
-
-```text
-rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6fffee32821a
-arm_pc=0x2054bc008
-num_insts=3
-inst_index=2
-x86 instruction bytes:
-  0x3208011fcc5 0x3408011fcc5
-```
-
-The two 64-bit words are little-endian instruction bytes. They decode as two consecutive 8-byte VEX-encoded 256-bit `vmovups` stores:
-
-```asm
-; first instruction, at x86_rip
-vmovups [rax+0x320], ymm0
-
-; second instruction, eight bytes later
-vmovups [rax+0x340], ymm0
-```
-
-The second store therefore begins at `x86_rip + 8`. Its encoded disp32 is `0x340` (not `0x334`); the first store's disp32 is `0x320`.
-
-The last confirmed main-image base was `0x6fffed550000`. **If the current run reports the same base**, the arithmetic is:
-
-```text
-0x6fffee32821a - 0x6fffed550000 = 0x00dd821a
-```
-
-That is a provisional main-image RVA of `0xDD821A`; the second store is at `0xDD8222`. The offset is about 13.85 MiB from the image base, well within the approximately 114 MB executable file-size envelope recorded by the loader. This address is therefore not, by itself, evidence of a fault in a title DLL.
-
-**Correction to the earlier conversational diagnosis:** the statement that `0x6fffee32821a` was above the main executable's mapped range was based on an incorrect subtraction. The correct difference from `0x6fffed550000` is `0xDD821A`, not `0x8DD821A`. Confirm the `mapped at` line from this same run before relying on the provisional RVA, because the base must come from the process that produced the exception.
-
-The user subsequently supplied the startup excerpt from `/tmp/victory-rva-test-2.log`. It confirms `fault tracking on`, mapped base `0x6fffed550000`, and `masked stores 1245 patched to plain stores`. This verifies the three earlier extra sites (`0x22f7e6`, `0x22f7ed`, `0x22f7f4`) were included in the patch set. With this confirmed base, the current exception is inside the main executable image at RVA **`0xDD821A`**; the second store is at **`0xDD8222`**. Adding both to the same explicit `VICTORY_PATCH_MASKED` list should produce **1,247 patched stores**, assuming both decode and patch successfully.
-
-This instruction sequence is consistent with another pair of unaligned 256-bit stores that Rosetta may be unable to resume when they fault across protected pages. The log alone does not establish that either instruction actually crossed a protected-page boundary; the next patch run is a controlled test of that hypothesis.
-
-#### Immediate follow-up
-
-1. The latest startup output is now confirmed: `fault tracking on`, mapped base `0x6fffed550000`, and **1,245 patched stores**. This includes the three previously identified extra sites.
-2. Add RVAs `dd821a` and `dd8222` to the explicit `VICTORY_PATCH_MASKED` list, retaining `all`, the eight original build-specific RVAs, and the three previously identified sites. The expected count is **1,247**.
-3. Preserve the full next log and check the startup patch count and any patch warnings before interpreting the next exception.
-
-### 6.3. Further Rosetta exception — 2026-11-28 00:26 UTC
-
-A subsequent run ended with:
-
-```text
-rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6ffff2498e54
-arm_pc=0x2077b9d58
-num_insts=3
-inst_index=2
-x86 instruction bytes:
-  0xc4f089482611fcc5 0x15f5c501d3186de3
-```
-
-Interpreting the supplied 64-bit words as little-endian instruction bytes, the bytes at the reported RIP begin:
-
-```text
-c5 fc 11 26 48 89 f0 c4 e3 6d 18 d3 01 c5 f5 15 ...
-```
-
-The instruction at the reported RIP is a **four-byte** VEX-encoded 256-bit unaligned store:
-
-```asm
-vmovups [rsi], ymm4
-```
-
-The following bytes begin other instructions (`mov rax, rsi` and a VEX-encoded instruction); they are not a second adjacent `vmovups` store.
-
-The latest startup excerpt, supplied after the exception, confirms:
-
-- Fault tracking: `on`
-- Main image base: `0x6fffed550000`
-- Masked/vector stores patched by `VICTORY_PATCH_MASKED`: **1,247**
-
-The candidate main-image-relative offset is therefore:
-
-```text
-0x6ffff2498e54 - 0x6fffed550000 = 0x04f48e54
-```
-
-This gives a candidate RVA of **`0x4F48E54`**, provided the reported instruction address belongs to the mapped main image's executable section. The startup excerpt confirms the image base, but the actual bytes and section membership at this RVA still need to be verified against the cached mapped image.
-
-#### Why the existing individual-RVA patcher is not sufficient
-
-`crates/victory-loader/src/masked.rs` explicitly rejects plain 256-bit stores shorter than five bytes in `decode_wide_move`: the normal patch is a five-byte relative jump, and a four-byte instruction does not have room for it. Adding RVA `4f48e54` to `VICTORY_PATCH_MASKED` alone will not patch this instruction.
-
-The repository provides a separate mechanism for this exact case:
-
-- `cargo xtask wide-stores <cached title image> > wide-sites.txt` uses `llvm-objdump` to enumerate the title image's 256-bit stores.
-- For a four-byte store, the generator can include adjacent movable instructions in a patch site, provided no branch target or unsafe instruction prevents it.
-- `VICTORY_PATCH_WIDE=<file>` applies the generated site list by rewriting the 256-bit stores as two 128-bit halves.
-
-The source comments identify the cached mapped executable under `<cache_dir>/images/`, but its filename is **not** based on the logged SHA-256 hash. `crates/victory-loader/src/prepare.rs`, `PreparedImage::file_name()`, names it `victory-image-<first-16-hex-of-BLAKE3(original executable bytes)>.dll`. The `victory config` command prints `cache_dir`, so the local cache path can be resolved without printing or transmitting the game installation path. Locate the large `victory-image-*.dll` candidate(s) rather than constructing the filename from the SHA-256 value.
-
-#### Immediate follow-up
-
-1. **Completed:** located the single large cached image in the checkout's active Wine prefix. The exact prefix, path, filename and size are recorded in `6.4.
-2. **Completed:** generated `/tmp/victory-wide-sites.txt` with `cargo xtask wide-stores`; the file contains 117,413 newline-terminated entries. The generator's stderr summary was not retained in the supplied terminal output, so its total disassembled-store count and number of four-byte stores left unlisted are not yet recorded.
-3. When using the complete generated list, set `VICTORY_PATCH_MASKED=all` for the scanned masked/vector stores and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt` for the remaining unmasked 256-bit stores. Do not also keep the old manually named wide-store RVAs in `VICTORY_PATCH_MASKED`: the generated wide list includes those unmasked stores, and applying both patch mechanisms to overlapping sites can make the second patch reject already-modified bytes.
-4. Confirm startup reports both `masked stores ... patched to plain stores` and `wide stores ... split into 128-bit halves`. Record the patched and refused counts; do not assume every site was patched.
-5. Preserve the complete log and inspect the next Rosetta RIP if one occurs. A listed four-byte store may still be left unpatched if the generator cannot safely move enough adjacent instructions or a branch targets the candidate run.
-
-The accompanying log lines showed host copies of title memory being released while memory was low, followed by completed DirectStorage read batches (including one batch of 1,309 requests). These establish memory-pressure handling and ongoing storage progress, but do not identify the cause of the Rosetta exception.
-
-
-### 6.4. Cached-image discovery and wide-store list — 2026-11-28
-
-The local search initially checked the conventional CrossOver bottles directory:
-
-```text
-~/Library/Application Support/CrossOver/Bottles
-```
-
-That directory contained neither a `victory-image-*.dll` file nor a directory matching `victory/cache`. This was a search-path mismatch, not evidence that VIctory had no image cache.
-
-The macOS launcher in `tools/macos/victory.sh` sets its default Wine prefix to the checkout-local path `$ROOT/target/wineprefix-play` (unless `WINEPREFIX` is already set). The matching cache was found under:
-
-```text
-target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/
-```
-
-Exactly one matching large image was reported:
-
-- **File:** `victory-image-b99f876b74d4a77f.dll`
-- **Size:** 120,181,760 bytes (approximately 114.6 MiB)
-- **Search result:** one candidate matching `victory-image-*.dll` and larger than 80 MiB
-
-The filename is the cache-generated name described in `6.3; it should not be reconstructed from the logged SHA-256.
-
-The first `command -v llvm-objdump` check returned no path. After installing Homebrew LLVM and adding its `bin` directory to the command's `PATH`, the following generation command completed successfully:
-
-```bash
-PATH="$(brew --prefix llvm)/bin:$PATH" cargo xtask wide-stores \
-  "$PWD/target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/victory-image-b99f876b74d4a77f.dll" \
-  > /tmp/victory-wide-sites.txt
-```
-
-The user supplied the command's success message and this line count:
-
-```text
-117413 /tmp/victory-wide-sites.txt
-```
-
-The resulting file therefore contains **117,413 list entries**. Per `xtask/src/wide_stores.rs`, each line describes a patch site using its RVA, overwritten byte count, and instruction pieces; it contains offsets and patch metadata, not game assets or the executable's contents. The generator disassembles the cached image's `.text` section, lists plain 256-bit stores, and excludes the masked-store forms handled by `VICTORY_PATCH_MASKED`.
-
-**Important qualification:** 117,413 is the number of generated list lines, not the number of sites the runtime will successfully patch. The generator's stderr summary (total stores found and four-byte stores it could not safely cover) was not included in the terminal output supplied for this record. The runtime patcher independently checks each site's bytes and can refuse a site if a trampoline cannot be built; startup reports the actual `wide stores N split into 128-bit halves (M refused)` result. A successful generation command alone does not verify that RVA `0x4F48E54` is covered, or that any site has yet been patched in a game run.
-
-#### Next controlled run
-
-The loader source in `apps/victory/src/run.rs` confirms that an explicit `VICTORY_PATCH_MASKED` setting overrides the automatic Series 1.0.2.1 selection, which otherwise includes `all` plus eight build-specific plain wide-store RVAs. With the complete generated list enabled, use:
-
-```bash
-VICTORY_FAULT_TRACKING=1 \
-VICTORY_PATCH_MASKED=all \
-VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt \
-./Launch.sh
-```
-
-Here, `VICTORY_PATCH_MASKED=all` prevents the eight automatically-added plain wide-store RVAs from also being sent through the masked-store patcher; the generated `VICTORY_PATCH_WIDE` list is intended to handle the plain 256-bit stores. Do not append the previously hand-entered plain-store RVAs to `VICTORY_PATCH_MASKED` for this run.
-
-The next startup log must be checked for all of the following:
-
-1. `fault tracking on`
-2. `masked stores N patched to plain stores`
-3. `wide stores N split into 128-bit halves (M refused)`
-
-Record both wide-store counts. In particular, a nonzero refused count is not automatically fatal, but it means some generated sites were not applied and the exception path may remain. Preserve the full log and capture any new Rosetta RIP and instruction bytes.
-
-## 7. Current interpretation
-
-### Confirmed
-
-1. The tested game build is Series 1.0.2.1 with the hash recorded above.
-2. Victory detects 1,234 masked/vector store candidates in the executable.
-3. Fault-based title-memory tracking was off in the 2026-11-27 baseline; a 2026-11-28 follow-up confirmed it on.
-4. The world-stage reports show multi-second frames, tens of gigabytes of title-memory copy traffic, and substantial texture-preparation work.
-5. Some wave64 operations are refused where the two-half lowering cannot safely synchronize.
-6. At least one mesh shader exceeded Metal's 32 KiB mesh-output limit.
-7. Many draws were reported without host pipelines; the sampled reports showed zero such pipelines actively being made.
-8. The 2026-11-27 baseline Rosetta exception was below the main image base and remained unattributed.
-9. A 2026-11-28 tracking-enabled run confirmed fault tracking on, a mapped base of `0x6fffed550000`, and 1,242 patched stores; it then faulted at main-image RVA `0x22f7e6` on a `vmovups [r12+0x60], ymm0` instruction.
-10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup output confirmed `fault tracking on` and 1,244 patched stores, verifying that the two preceding sites were added to the patch set.
-11. The next run's startup excerpt confirms `fault tracking on`, mapped base `0x6fffed550000`, and 1,245 patched stores. Its exception at `0x6fffee32821a` is therefore at confirmed main-image RVA `0xDD821A`; the supplied bytes also identify a second candidate store at RVA `0xDD8222`.
-12. A further exception occurred at `0x6ffff2498e54`; the instruction at the RIP decodes to `vmovups [rsi], ymm4`. Relative to the last confirmed base, the candidate RVA is `0x4F48E54`, but the mapped base and patch count from this latest run are still required to confirm it.
-13. The local cache search found one 120,181,760-byte image at `target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/victory-image-b99f876b74d4a77f.dll`; the conventional CrossOver Bottles directory did not contain this cache.
-14. `cargo xtask wide-stores` completed against that cached image and wrote 117,413 lines to `/tmp/victory-wide-sites.txt`. This confirms generation and file length only; it does not establish how many runtime sites will patch successfully.
-11. A later exception was reported at `0x6fffee32821a`, with bytes decoding to two consecutive 256-bit `vmovups` stores. The same run's startup excerpt confirms the main-image base `0x6fffed550000` and 1,245 stores patched, giving confirmed main-image RVAs `0xDD821A` and `0xDD8222` for the two candidate sites.
-
-### Strong performance lead
-
-The wholesale title-memory-copy fallback is the most concrete explanation for the unusually large copy volume and multi-second CPU preparation. Restoring changed-page tracking safely is the highest-value performance experiment because it targets a measured cost and has an existing opt-in/patching path in the code.
-
-### Still unproven
-
-- Whether fault tracking can run stably on this macOS/Rosetta setup after every faulting plain 256-bit store in the executable and relevant title DLLs has been patched.
-- How much of the current copy volume is avoidable versus memory that cannot be page-tracked.
-- Which exact shader hashes account for the largest visually significant missing passes.
-- Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
-- Whether adding RVA `0x22f7f4` will allow that first store sequence to complete without another Rosetta exception.
-- Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let that part of the title proceed without another Rosetta exception.
-- Whether RVA `0x4F48E54` is covered by an entry in `/tmp/victory-wide-sites.txt`; the generated file exists, but its contents have not yet been checked against this RVA.
-- How many of the 117,413 generated entries the runtime patcher will apply versus refuse, and whether the previously identified Series 1.0.2.1 plain-store RVAs are covered by the list.
-- Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
-
-## 8. Recommended next experiments
-
-1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
-2. **Run the generated wide-store patcher in a controlled test.** The exact cached image has been found and `/tmp/victory-wide-sites.txt` now contains 117,413 generated entries. Launch with `VICTORY_FAULT_TRACKING=1`, `VICTORY_PATCH_MASKED=all`, and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt`. The explicit masked setting prevents the automatic eight plain-store RVAs from also being sent through the masked-store patcher; the generated list handles the plain 256-bit stores.
-3. **Verify actual application, not just list generation.** Retain the startup lines for `masked stores N patched to plain stores` and `wide stores N split into 128-bit halves (M refused)`. The 117,413 list entries are not a promise that all sites will be patched. Check whether the entry covering RVA `0x4F48E54` is present and whether its runtime site is accepted.
-4. **Retain the full log for the next attempt.** Record the patch counts and refused count, then capture the next RIP and instruction bytes if Rosetta still stops.
-5. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
-6. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
-
-## Source locations
-
-The following implementation files explain the mechanisms discussed above:
-
-- [`apps/victory/src/run.rs`](apps/victory/src/run.rs) — build identification, masked-store scan, fault-tracking report, automatic Series 1.0.2.1 patch RVAs, CLWB handling.
-- [`crates/victory-gpu/src/watch.rs`](crates/victory-gpu/src/watch.rs) — Rosetta detection, fault-tracking default, guarded-page write tracking.
-- [`crates/victory-loader/src/masked.rs`](crates/victory-loader/src/masked.rs) — AVX/vector store scanning and trampoline patching.
-- [`xtask/src/wide_stores.rs`](xtask/src/wide_stores.rs) — offline disassembly and generation of the `VICTORY_PATCH_WIDE` site list.
-- [`crates/victory-loader/src/wide.rs`](crates/victory-loader/src/wide.rs) — runtime validation and splitting of plain 256-bit stores into 128-bit halves.
-- [`crates/victory-gpu/src/memory.rs`](crates/victory-gpu/src/memory.rs) and [`crates/victory-gpu/src/host.rs`](crates/victory-gpu/src/host.rs) — title-memory shadows, refresh/copy preparation, and per-frame reporting.
-- [`crates/victory-shader/src/emit/lower/halves.rs`](crates/victory-shader/src/emit/lower/halves.rs) — wave64-on-wave32 lowering and cross-half refusal conditions.
-- [`crates/victory-shader/src/emit/mesh_size.rs`](crates/victory-shader/src/emit/mesh_size.rs) and [`crates/victory-gpu/src/pipeline/host.rs`](crates/victory-gpu/src/pipeline/host.rs) — Metal mesh-output sizing and over-limit rejection.
-- [`crates/victory-gpu/src/pipeline/schedule.rs`](crates/victory-gpu/src/pipeline/schedule.rs) and [`crates/victory-gpu/src/pipeline/make.rs`](crates/victory-gpu/src/pipeline/make.rs) — asynchronous host-pipeline workers, wait budgets, and dropped draws.
-
-
-### Additional source locations for the 01:03–01:29 follow-up
-
-- [`crates/victory-loader/src/windows.rs`](crates/victory-loader/src/windows.rs) — maps title-owned DLLs and applies per-image lists from `VICTORY_PATCH_WIDE_DIR/<first-16-hex-of-image-hash>.txt`.
-- [`crates/victory-gpu/src/shadow.rs`](crates/victory-gpu/src/shadow.rs) — low-memory release of idle title-memory host copies and the recreated-copy counter.
-- [`crates/victory-gpu/src/texture.rs`](crates/victory-gpu/src/texture.rs) — texture detiling, staging buffers, and refresh work.
-
----
-
-**Revision note:** The tested local revision was `8791724`. The repository's `main` branch subsequently advanced to `648d0851` with two commits affecting only `Launch.sh`; the source files used for this analysis were unchanged in that comparison. This document is being added to the current `main` branch.
-
----
-
-## 9. Latest follow-up — title-DLL fault patched; performance remains poor (2026-11-28 01:03–01:29 UTC)
-
-This section records the current state after applying the generated wide-store list to both the main executable and the identified title-owned DLL. It supersedes the earlier “next experiment” status in sections 7 and 8: both patch lists have now been applied and verified at runtime.
-
-### 9.1. Attribution of the recurring Rosetta exception
-
-With fault tracking on and the main executable's generated wide-store list enabled, the run reported:
-
-- Main image base: `0x6fffed550000`
-- Masked/vector stores: **1,234 patched**
-- Main-image wide stores: **117,413 patched, 0 refused**
-- User-visible outcome: actual game frames appeared for about five seconds, then the run stopped with the recurring Rosetta exception.
-
-The exception:
+With fault tracking enabled, the recurring error was:
 
 ~~~text
 rosetta error: unexpectedly need to EmulateForward on a synchronous exception
-x86_rip=0x6fffed474b2f
-arm_pc=0x7402cd3e34
-num_insts=3
-inst_index=2
-x86 instruction bytes:
-  0x1078c1c40011fcc5 0xeb204811f8c52049
 ~~~
 
-A Wine module trace recorded 79 loaded-module records. It showed the closest module base below the exception RIP was the cached image `victory-image-2d3fbea0ca5034e7.dll` at `0x6fffed460000`. VIctory's own startup output identified that mapping as `xboxbvhbuilder.dll`. The module-relative address is:
+The exception reports supplied an x86 instruction pointer (RIP), ARM program counter, and instruction bytes. Converting the reported RIP to an image-relative address, then inspecting the bytes in the corresponding cached image, identified unaligned 256-bit \`vmovups\` stores.
+
+### 3.1. Main-executable faults
+
+The initial tracking-enabled runs identified a sequence of stores in the main executable:
+
+| Main-image RVA | Decoded instruction |
+|---|---|
+| \`0x22f7e6\` | \`vmovups [r12+0x60], ymm0\` |
+| \`0x22f7ed\` | \`vmovups [r12+0x40], ymm0\` |
+| \`0x22f7f4\` | \`vmovups [r12+0x78], ymm0\` |
+
+Later exceptions identified another pair of candidate stores:
+
+| Main-image RVA | Decoded instruction |
+|---|---|
+| \`0xdd821a\` | \`vmovups [rax+0x320], ymm0\` |
+| \`0xdd8222\` | \`vmovups [rax+0x340], ymm0\` |
+
+A further reported instruction decoded as:
+
+~~~asm
+vmovups [rsi], ymm4
+~~~
+
+Its candidate main-image RVA was \`0x4f48e54\`, using the main-image base confirmed in that investigation sequence.
+
+The instruction bytes and image-base arithmetic established that these faults were associated with plain 256-bit stores. Adding individual RVAs one at a time advanced the patch count, but another store could fault later. The investigation therefore moved to generating a complete list of eligible wide-store sites in the cached image.
+
+### 3.2. DLL fault attribution
+
+Patching the main executable alone did not clear the recurring exception. A later fault occurred at:
+
+~~~text
+x86_rip=0x6fffed474b2f
+~~~
+
+The module trace identified the cached image \`victory-image-2d3fbea0ca5034e7.dll\`, mapped at \`0x6fffed460000\`, as the title-owned \`xboxbvhbuilder.dll\`.
+
+The module-relative fault address is:
 
 ~~~text
 0x6fffed474b2f - 0x6fffed460000 = 0x14b2f
 ~~~
 
-The cached image was inspected locally. Its image size was `0xDE000`; RVA `0x14B2F` lies in executable section `.text`. The bytes at that RVA were:
-
-~~~text
-c5 fc 11 00 c4 c1 78 10 49 20 c5 f8 11 48 20 eb
-~~~
-
-The instruction at the faulting RVA decodes to:
+The faulting instruction at DLL RVA \`0x14b2f\` was:
 
 ~~~asm
 vmovups [rax], ymm0
 ~~~
 
-This attributes the recurring RIP to the title-owned `xboxbvhbuilder.dll`, not to the main executable or an unidentified Wine module.
+This established that the recurring exception was not confined to the main executable. The relevant title DLL needed its own wide-store manifest.
 
-### 9.2. Generate and verify the DLL-specific patch list
+## 4. Generated patch data
 
-The existing `cargo xtask wide-stores` generator was run against the cached mapped image. Its output was kept outside the repository.
+The generator was run against the cached mapped images rather than against an assumed on-disk game executable path.
 
-Generator output:
+### 4.1. Main executable manifest
 
-~~~text
-Image size: 0xde000
-Fault RVA:  0x14b2f
-Containing section: .text
-Executable: True
-Bytes at fault: c5 fc 11 00 c4 c1 78 10 49 20 c5 f8 11 48 20 eb
-
-122 /tmp/victory-wide-dlls/2d3fbea0ca5034e7.txt
-123 256-bit stores; 122 sites listed; 0 4-byte stores left
-(no room and nothing that can be moved)
-~~~
-
-The explicit range-coverage check found exactly one site covering the fault RVA:
+The cached main image was found under the checkout's Wine prefix:
 
 ~~~text
-List entries: 122
-Target RVA: 0x14b2f
-Sites covering target: 1
-Line 99: 14b2f 10 s4 c6
+target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/
 ~~~
 
-The ten-byte site begins with the four-byte store (`s4`) and includes six adjacent movable bytes (`c6`). The generator reported zero four-byte stores left uncovered in this DLL.
+The cached image was:
 
-### 9.3. Runtime application of both wide-store lists
+~~~text
+victory-image-b99f876b74d4a77f.dll
+~~~
 
-The next launch used:
+It was 120,181,760 bytes (approximately 114.6 MiB).
+
+The generator command was:
+
+~~~bash
+PATH="$(brew --prefix llvm)/bin:$PATH" cargo xtask wide-stores \
+  "$PWD/target/wineprefix-play/drive_c/users/crossover/AppData/Local/victory/cache/images/victory-image-b99f876b74d4a77f.dll" \
+  > /tmp/victory-wide-sites.txt
+~~~
+
+Generation completed and produced:
+
+- **117,413 lines**
+- **117,413 generated main-image patch-site entries**
+
+The generated file contains site metadata (image-relative offsets, overwrite lengths and instruction pieces). It does not contain the game executable or game assets.
+
+### 4.2. DLL manifest
+
+The corresponding cached image for \`xboxbvhbuilder.dll\` had image size \`0xDE000\`. The recurring fault was at RVA \`0x14b2f\` in executable section \`.text\`.
+
+The DLL generator produced:
+
+- **122 patch-site entries**
+- One generated site covering RVA \`0x14b2f\`
+- **0 four-byte stores left uncovered**, according to the generator output
+
+The exact site covering the observed fault was:
+
+~~~text
+14b2f 10 s4 c6
+~~~
+
+The site begins with the four-byte store and includes six adjacent movable bytes. The runtime applied all 122 generated DLL sites.
+
+### 4.3. Committed repository files
+
+The generated files are now committed in the fork:
+
+| Repository path | Entries |
+|---|---:|
+| \`runtime-patches/victory-wide-sites.txt\` | 117,413 |
+| \`runtime-patches/victory-wide-dlls/2d3fbea0ca5034e7.txt\` | 122 |
+| **Total** | **117,535** |
+
+The two manifests are submitted to the original project in:
+
+**[PR #656 — Add generated Rosetta wide-store patch-site manifests](https://github.com/pragyaangaur/VIctory-macOS/pull/656)**
+
+The PR contributes the generated data files. It does not add new runtime patching code or modify the executable. The existing loader consumes the manifests and performs the in-memory transformation during launch.
+
+## 5. Runtime patch application
+
+The successful tested configuration used:
 
 ~~~bash
 VICTORY_FAULT_TRACKING=1
@@ -623,7 +233,14 @@ VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt
 VICTORY_PATCH_WIDE_DIR=/tmp/victory-wide-dlls
 ~~~
 
-The user supplied these startup/runtime diagnostics:
+The settings serve separate purposes:
+
+- \`VICTORY_FAULT_TRACKING=1\` enables guarded-page title-memory tracking.
+- \`VICTORY_PATCH_MASKED=all\` applies the existing masked/vector-store patch path to the scanned candidates.
+- \`VICTORY_PATCH_WIDE\` supplies the generated wide-store site list for the main executable.
+- \`VICTORY_PATCH_WIDE_DIR\` supplies per-image lists for title-owned DLLs. The file is selected using the image hash prefix.
+
+The runtime reported:
 
 ~~~text
 fault tracking on
@@ -631,6 +248,7 @@ masked stores 1234 patched to plain stores
 
 wide stores split into 128-bit halves
   patched=117413 refused=0
+
 wide stores 117413 split into 128-bit halves (0 refused)
 
 wide stores split into 128-bit halves
@@ -641,83 +259,135 @@ wide stores of a title DLL split
   n=122 refused=0
 
 title dll xboxbvhbuilder.dll at 0x6fffed460000
-bound xboxbvhbuilder.dll: 9 hle, 48 host, 0 title, 0 missing
 ~~~
 
-Confirmed runtime results:
+The masked-store count and wide-store counts are different patch paths. The 117,413 and 122 figures refer to the generated wide-store manifests; they should not be confused with the 1,234 masked/vector-store count.
 
-| Image / patch path | Patched | Refused |
-|---|---:|---:|
-| Main executable — masked/vector stores | 1,234 | Not reported as a refused count |
-| Main executable — generated wide-store list | 117,413 | 0 |
-| `xboxbvhbuilder.dll` — per-DLL wide-store list | 122 | 0 |
+The wide-store patcher rewrites each accepted 256-bit store into two 128-bit halves. The loader validates the listed sites against the mapped image and can refuse a site if the expected bytes or patch conditions do not match. In this run, both generated lists were applied with zero refusals.
 
-The DLL generator found 123 256-bit stores and produced 122 sites; the runtime successfully applied 122 sites. Do not describe this as 123 runtime patches.
+## 6. Runtime outcome after the patches
 
-The user reported that this run remained active and displayed actual game frames, with observed performance fluctuating between approximately **0 and 4 FPS**. A scan of `/tmp/victory-dll-wide-test.log` found no `rosetta error:` line at the time it was checked. This is evidence that the run progressed beyond the previously recurring DLL fault; it does not prove every possible Rosetta exception has been eliminated.
+The observed result changed materially after both image manifests were applied:
 
-### 9.4. Performance measurements from the patched run
+- The process progressed into actual game rendering.
+- Visible frames appeared rather than only a black window with audio.
+- The inspected patched-run log contained no later \`rosetta error:\` line.
+- The user reported that the game remained running, with the latest observed rate around **4 FPS**.
 
-Three frame reports supplied by the user:
+The absence of a later exception in the inspected log, together with the runtime's zero-refusal counts and the current running session, is strong evidence that these manifests address the recurring wide-store fault path encountered during this investigation.
 
-| Timestamp UTC | FPS | Frame time | Preparing | Title-memory copies | Texture preparation | GPU | Copy-back |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| 01:28:48.585 | 2.7 | 372.4 ms | 142.0 ms | 64.0 ms / 191.4 MB | 28.8 ms / 7.6 MB | 163.2 ms | 14.5 ms / 0.0 MB |
-| 01:29:03.913 | 0.5 | 2,189.9 ms | 351.5 ms | 232.9 ms / 269.8 MB | 291.7 ms / 58.0 MB | 295.7 ms | 26.2 ms / 0.0 MB |
-| 01:29:09.301 | 0.2 | 5,385.7 ms | 482.0 ms | 244.2 ms / 282.6 MB | 376.9 ms / 105.7 MB | 1,470.5 ms | 26.7 ms / 0.0 MB |
+It is not proof that every possible Rosetta fault has been eliminated. The result is established for the tested executable build and observed run.
 
-Additional reported values:
+## 7. Performance after the crash fix
 
-- Draws/frame: **2,626**, **644**, and **1,951**.
-- Draws dropped without a host pipeline: **388**, **348**, and **716**.
-- Pipelines being made at those report points: **3**, **4**, and **1**.
-- Host-list/title-submission work: **303.2 ms**, **660.8 ms**, and **1,935.1 ms** per reported frame.
-- Queue-lock wait, queue-signal wait, queue wait, fence-call wait, present wait, and the runtime timer were all reported as **0.0 ms** in the corresponding title-submission breakdown.
+The crash is no longer the immediate blocker, but the frame rate remains very low.
 
-Preparation, GPU, and copy-back are separately instrumented categories; do not add them as though they are guaranteed to be disjoint or expect them to sum to frame time. The samples vary too much to be treated as a stable average. Both CPU-side preparation and GPU execution are substantial in the supplied reports. GPU time rose from 163.2 ms to 1,470.5 ms; title-submission work also varied substantially.
+The earlier baseline reports, with fault tracking off, were:
 
-A separate warning reported the host GPU still waiting after one second, with submitted/completed values `8647` and `8646`. This is one outstanding completion at the time of the warning, not proof by itself of a permanent GPU hang.
+| Report | FPS | Frame time | Title-memory copies |
+|---|---:|---:|---:|
+| Around frame 1611 | 0.2 | 4,375.4 ms | 27,018.7 MB |
+| Around frame 1612 | 0.1 | 7,950.8 ms | 28,092.7 MB |
 
-### 9.5. Memory-pressure observations
+After fault tracking and both wide-store manifests were active, the supplied instrumented reports included:
 
-The run repeatedly logged:
+| Timestamp UTC | FPS | Frame time | Preparing | Title-memory copies | Texture preparation | GPU time |
+|---|---:|---:|---:|---:|---:|---:|
+| 01:28:48.585 | 2.7 | 372.4 ms | 142.0 ms | 64.0 ms / 191.4 MB | 28.8 ms / 7.6 MB | 163.2 ms |
+| 01:29:03.913 | 0.5 | 2,189.9 ms | 351.5 ms | 232.9 ms / 269.8 MB | 291.7 ms / 58.0 MB | 295.7 ms |
+| 01:29:09.301 | 0.2 | 5,385.7 ms | 482.0 ms | 244.2 ms / 282.6 MB | 376.9 ms / 105.7 MB | 1,470.5 ms |
 
-~~~text
-host copies of title memory given up while memory is low
+These samples are highly variable and are not a controlled benchmark. The latest user-reported runtime result is approximately **4 FPS**, which is an improvement in the current session but still far below the intended performance.
+
+The earlier baseline's tens-of-gigabytes copy volume is consistent with the fault-tracking-off whole-copy path. The later reports show much smaller title-memory copy volumes in the sampled frames. This supports the conclusion that enabling tracking reduced that particular source of work. It does not establish that title-memory copies are now the only or dominant performance bottleneck.
+
+### Remaining performance leads
+
+1. **GPU execution varies substantially.** The supplied GPU-time reports ranged from 163.2 ms to 1,470.5 ms. This is large enough to warrant further investigation of GPU work and scene complexity.
+2. **Texture preparation is still measurable.** The supplied samples show 7.6–105.7 MB of texture preparation per report frame.
+3. **Host pipeline availability is incomplete in some samples.** The reports showed 388, 348 and 716 draws dropped without a host pipeline, while 3, 4 and 1 pipelines respectively were still being made. Those counters do not by themselves identify whether each missing pipeline was refused, still compiling, or unavailable for another reason.
+4. **Memory pressure remains present.** The log reported host copies of title memory being released while memory was low. One event reported 183 copies and 81 MB released, with 831 copies subsequently made again. This confirms eviction/recreation activity, but not its exact contribution to frame time.
+5. **Shader compatibility still has known limitations.** Some wave64 operations cannot be safely lowered to a 32-lane host in all synchronization/control-flow contexts. At least one mesh shader requested 34,816 bytes of output, exceeding Metal's 32,768-byte limit by 2,048 bytes. These can cause individual pipelines or draws to be unavailable, but they are separate from the Rosetta wide-store exception.
+
+The frame-time categories are instrumented separately and should not be added together as though they are guaranteed to be disjoint. The supplied reports also show little or no queue/fence waiting in their title-submission breakdowns; this does not rule out long GPU execution.
+
+## 8. What is established, and what is not
+
+### Established by supplied logs and generated artifacts
+
+- The tested executable is Series 1.0.2.1 with the SHA-256 recorded above.
+- Fault tracking was off in the original baseline and on in the successful patched run.
+- The original tracking-enabled exceptions included unaligned 256-bit stores in the main executable.
+- A further recurring fault was attributed to \`xboxbvhbuilder.dll\` at RVA \`0x14b2f\`.
+- The main manifest contains 117,413 entries and the DLL manifest contains 122.
+- The runtime reported 117,413 main-image wide-store patches and 122 DLL wide-store patches, with zero refusals for both lists.
+- The runtime separately reported 1,234 masked/vector stores patched.
+- After both wide-store lists were applied, the inspected log showed no later Rosetta exception and actual rendered frames appeared.
+- The latest user-reported state is a running game at approximately 4 FPS.
+
+### Not yet established
+
+- That the game will never encounter another Rosetta exception in a different scene, session or executable build.
+- That every generated site is necessary; the manifests are broad generated lists, not a minimal fault-only list.
+- That the current frame rate is stable across a longer session or a repeatable benchmark.
+- Which exact GPU workloads account for the remaining frame-time spikes.
+- Whether dropped host-pipeline draws are primarily due to translation refusals, host-pipeline creation refusals, compilation latency, or a combination.
+- Whether the memory-pressure copy-release path contributes materially to the remaining stalls.
+- Whether the remaining wave64 and mesh-output limitations explain any specific visible rendering defect in the current run.
+
+## 9. Current launch configuration
+
+From the repository root, the committed manifests can be selected directly instead of relying on the temporary files in \`/tmp\`:
+
+~~~bash
+VICTORY_FAULT_TRACKING=1 \
+VICTORY_PATCH_MASKED=all \
+VICTORY_PATCH_WIDE="$PWD/runtime-patches/victory-wide-sites.txt" \
+VICTORY_PATCH_WIDE_DIR="$PWD/runtime-patches/victory-wide-dlls" \
+./Launch.sh
 ~~~
 
-One event reported `copies=183`, `mb=81`, `made_again=831`. The implementation in `crates/victory-gpu/src/shadow.rs` confirms this message comes from the low-memory release path: eligible idle host copies are discarded to free memory, and recreated from title memory when next requested. `made_again` is the running count of copies recreated after earlier release events. The event confirms host-copy eviction under memory pressure, but does not quantify the frame-time cost of that churn.
+This is the configuration corresponding to the successful runtime patch application described above. Confirm the startup output on every run; patch counts and refusal counts are the check that the manifests were actually loaded and applied.
 
-The supplied title-memory reports also showed approximately **83.6–85.6 MB** of views kept whose command lists read title memory without a host copy, **4 missed pages**, **0 withheld**, and **0 256 MiB regions with no copy**. These are separate memory-path diagnostics and are not, by themselves, proof of a visual correctness defect.
+Do not change the game executable, generated lists, or patch-selection settings during a performance comparison. Keep the executable hash and full run log with each measurement.
 
-### 9.6. Current interpretation and next work
+## 10. Next investigation priorities
 
-**Confirmed**
+The next phase should focus on performance and longer-session stability, not adding speculative individual fault RVAs.
 
-1. The recurring RIP `0x6fffed474b2f` belongs to `xboxbvhbuilder.dll` at RVA `0x14B2F` and points to `vmovups [rax], ymm0` in executable section `.text`.
-2. The DLL list covers that exact RVA; its generator reported zero four-byte stores left uncovered.
-3. VIctory applied 122 DLL wide-store sites with zero refusals through `VICTORY_PATCH_WIDE_DIR`.
-4. In the same run, the main executable list applied 117,413 sites with zero refusals and the masked-store patcher applied 1,234 sites.
-5. The inspected run log contained no later Rosetta exception, and the user observed actual frames while the process remained running.
-6. Performance remains extremely poor and variable: supplied reports ranged from 2.7 to 0.2 FPS.
-7. CPU preparation, texture preparation, GPU execution, dropped host pipelines, and memory pressure all remain candidates in the performance investigation; the supplied reports do not isolate one dominant cause.
-8. The low-memory host-copy release path is active and repeatedly releases copies that may later be recreated.
+1. **Confirm persistence:** run the current patched configuration through a longer repeatable gameplay segment and retain the complete log. Record whether the process remains free of Rosetta exceptions.
+2. **Measure FPS and frame time consistently:** capture several consecutive reports in the same scene and distinguish rendered frames from simulation/update ticks.
+3. **Profile GPU work:** identify expensive command lists, passes, and pipelines. Do not rely on \`VICTORY_GPU_TIMING\` for per-command attribution on macOS/D3DMetal where the source notes D3D12 timestamps may read as zero.
+4. **Investigate dropped draws:** retain shader hashes and the actual translation or host-creation refusal reasons. Separate unsupported shader operations from pipelines that are merely not ready.
+5. **Correlate memory pressure:** collect process memory, host video-memory budget/use, texture counts, descriptor-view counts and host-copy release/recreation counters in the same run.
+6. **Avoid premature tuning:** do not disable host-copy release or increase memory retention without measuring the memory budget and determining whether eviction/recreation is responsible for the observed stalls.
 
-**Still unproven**
+## 11. Relevant source locations
 
-- Whether any other title-owned DLLs contain faulting plain 256-bit stores.
-- Whether the absence of a further Rosetta exception persists across longer sessions and different scenes.
-- Whether host-copy eviction/recreation is the dominant cause of the frame-time collapse.
-- Why GPU execution time varies so widely.
-- Which command lists or pipelines account for the longest GPU execution on D3DMetal.
-- Whether dropped draws without a host pipeline mainly reflect translation refusal, pipeline creation refusal, compilation latency, or multiple causes.
+- \`apps/victory/src/run.rs\` — executable identification, masked-store scan, fault-tracking report and patch selection.
+- \`crates/victory-gpu/src/watch.rs\` — Rosetta detection and guarded-page title-memory tracking.
+- \`crates/victory-loader/src/masked.rs\` — masked/vector-store scanning and patching.
+- \`xtask/src/wide_stores.rs\` — offline generation of wide-store patch-site manifests.
+- \`crates/victory-loader/src/wide.rs\` — runtime validation and splitting of plain 256-bit stores into 128-bit halves.
+- \`crates/victory-loader/src/windows.rs\` — title-owned DLL mapping and per-image wide-store list application.
+- \`crates/victory-gpu/src/memory.rs\` and \`crates/victory-gpu/src/host.rs\` — title-memory shadows, refresh/copy preparation and frame diagnostics.
+- \`crates/victory-gpu/src/shadow.rs\` — low-memory release and recreation of title-memory host copies.
+- \`crates/victory-gpu/src/texture.rs\` — texture preparation and staging.
+- \`crates/victory-shader/src/emit/lower/halves.rs\` — wave64-on-wave32 lowering and unsupported cross-half cases.
+- \`crates/victory-shader/src/emit/mesh_size.rs\` and \`crates/victory-gpu/src/pipeline/host.rs\` — mesh-output sizing and Metal-limit rejection.
+- \`crates/victory-gpu/src/pipeline/schedule.rs\` and \`crates/victory-gpu/src/pipeline/make.rs\` — asynchronous host-pipeline compilation, wait budgets and dropped draws.
 
-**Next diagnostic priorities**
+---
 
-1. Preserve the four environment settings above as the current fault-tracking baseline. Do not add ad hoc RVAs or alter either generated list during the next comparison.
-2. Capture a diagnostics-build run for memory telemetry. The diagnostics code in `crates/victory-gpu/src/host.rs` can report local/non-local video-memory use and budget, process commit/working set, Rust heap, placed textures, and descriptor-view counts. Correlate those values with the low-memory shadow-copy release events.
-3. Do not rely on `VICTORY_GPU_TIMING` for per-command GPU attribution on macOS/D3DMetal: the source explicitly notes D3D12 timestamps read as zero under D3DMetal.
-4. Investigate dropped host pipelines separately from the Rosetta store faults; retain shader/pipeline hashes and actual translation or creation refusal reasons.
-5. Compare several reports in the same repeatable scene before proposing a performance change. Current samples vary too much to support a single-bottleneck diagnosis.
-6. Do not disable the host-copy release policy or increase memory retention without first measuring the memory budget.
+## Upstream contribution
 
+The generated manifests described in this report are submitted for upstream review:
+
+**[PR #656 — Add generated Rosetta wide-store patch-site manifests](https://github.com/pragyaangaur/VIctory-macOS/pull/656)**
+
+The PR contains exactly these two generated data files:
+
+- \`runtime-patches/victory-wide-sites.txt\` — 117,413 main-executable patch sites.
+- \`runtime-patches/victory-wide-dlls/2d3fbea0ca5034e7.txt\` — 122 \`xboxbvhbuilder.dll\` patch sites.
+
+The manifests preserve the generated site data. Runtime patching is performed by the existing VIctory loader when the corresponding environment settings are enabled.
