@@ -386,11 +386,11 @@ The repository provides a separate mechanism for this exact case:
 - For a four-byte store, the generator can include adjacent movable instructions in a patch site, provided no branch target or unsafe instruction prevents it.
 - `VICTORY_PATCH_WIDE=<file>` applies the generated site list by rewriting the 256-bit stores as two 128-bit halves.
 
-The source comments identify the cached mapped executable as `<cache_dir>/images/victory-image-<executable-hash>.dll`. The `victory config` command prints `cache_dir`, so the local cache path can be resolved without printing or transmitting the game installation path.
+The source comments identify the cached mapped executable under `<cache_dir>/images/`, but its filename is **not** based on the logged SHA-256 hash. `crates/victory-loader/src/prepare.rs`, `PreparedImage::file_name()`, names it `victory-image-<first-16-hex-of-BLAKE3(original executable bytes)>.dll`. The `victory config` command prints `cache_dir`, so the local cache path can be resolved without printing or transmitting the game installation path. Locate the large `victory-image-*.dll` candidate(s) rather than constructing the filename from the SHA-256 value.
 
 #### Immediate follow-up
 
-1. Use `tools/macos/victory.sh config` locally to obtain `cache_dir`, then locate `images/victory-image-b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93.dll`.
+1. Use `tools/macos/victory.sh config` locally to obtain `cache_dir`, then list large files matching `images/victory-image-*.dll`. The exact filename uses the first 16 hex characters of the BLAKE3 hash, not the logged full SHA-256 hash. Identify the main executable image by its size (roughly the game executable's size); if more than one large cached image exists, do not guess which build it is.
 2. Run `cargo xtask wide-stores <cached-image> > /tmp/victory-wide-sites.txt`. The command requires `llvm-objdump` (installable with `brew install llvm` if absent). Its stderr summary reports the number of 256-bit stores found, patch sites listed, and four-byte stores it could not safely cover.
 3. When using the complete generated list, set `VICTORY_PATCH_MASKED=all` for the scanned masked/vector stores and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt` for the remaining unmasked 256-bit stores. Do not also keep the old manually named wide-store RVAs in `VICTORY_PATCH_MASKED`: the generated wide list includes those unmasked stores, and applying both patch mechanisms to overlapping sites can make the second patch reject already-modified bytes.
 4. Confirm startup reports both `masked stores ... patched to plain stores` and `wide stores ... split into 128-bit halves`. Record the patched and refused counts; do not assume every site was patched.
