@@ -334,6 +334,54 @@ This instruction sequence is consistent with another pair of unaligned 256-bit s
 2. Add RVAs `dd821a` and `dd8222` to the explicit `VICTORY_PATCH_MASKED` list, retaining `all`, the eight original build-specific RVAs, and the three previously identified sites. The expected count is **1,247**.
 3. Preserve the full next log and check the startup patch count and any patch warnings before interpreting the next exception.
 
+### 6.3. Further Rosetta exception — 2026-11-28 00:26 UTC
+
+A subsequent run ended with:
+
+```text
+rosetta error: unexpectedly need to EmulateForward on a synchronous exception
+x86_rip=0x6ffff2498e54
+arm_pc=0x2077b9d58
+num_insts=3
+inst_index=2
+x86 instruction bytes:
+  0xc4f089482611fcc5 0x15f5c501d3186de3
+```
+
+Interpreting the supplied 64-bit words as little-endian instruction bytes, the bytes at the reported RIP begin:
+
+```text
+c5 fc 11 26 48 89 f0 c4 e3 6d 18 d3 01 c5 f5 15 ...
+```
+
+The instruction at the reported RIP is:
+
+```asm
+vmovups [rsi], ymm4
+```
+
+This is a 256-bit unaligned vector store to the address held in `rsi`. The following bytes begin other instructions (`mov rax, rsi` and a VEX-encoded instruction); they are **not** evidence of a second adjacent `vmovups` store. Only the first store is identified as the current fault RIP, so do not add a second guessed RVA from this byte sequence.
+
+The most recent previously confirmed main-image base was `0x6fffed550000`. **If the run that produced this exception used that same base**, the candidate offset is:
+
+```text
+0x6ffff2498e54 - 0x6fffed550000 = 0x04f48e54
+```
+
+That gives a **provisional** main-image RVA of `0x4F48E54`. It is not yet a confirmed RVA because the startup mapping line from `/tmp/victory-rva-test-3.log` has not been supplied. Confirm the mapping from this exact process before using the offset in a patch list. If the base differs, calculate the RVA from the current run's base instead.
+
+The accompanying log lines show host copies of title memory being released while memory is low, followed by completed DirectStorage read batches (including one batch of 1,309 requests). Those messages show memory-pressure handling and active storage progress; they do not identify the cause of the Rosetta exception. The process still terminates with a Rosetta synchronous-exception trap.
+
+The shell's zsh termination line shows an empty-looking `VICTORY_PATCH_MASKED=` assignment, but, as in the previous run, this shell rendering is not a reliable substitute for the loader's own startup summary. The current run's `fault tracking`, `mapped at`, `masked stores N patched to plain stores`, and loaded-module lines are still required. In particular, the expected count is **1,247** only if all five extra sites from the prior confirmed sequence are still included (the eight built-in build-specific sites plus the five manually named RVAs: `0x22f7e6`, `0x22f7ed`, `0x22f7f4`, `0xdd821a`, `0xdd8222`).
+
+#### Immediate follow-up
+
+1. Verify this run's own image base, patch count, and module list:
+   `grep -E 'fault tracking|mapped at|masked stores|wide stores|title dll' /tmp/victory-rva-test-3.log`
+2. If the base is `0x6fffed550000`, inspect the executable image at RVA `0x4f48e54` and confirm the bytes decode there to `vmovups [rsi], ymm4`. Only then add `4f48e54` to the existing explicit patch list.
+3. If the mapping differs, recalculate from the current run's base. If the address belongs to a different loaded image, use that image's own patch mechanism rather than treating it as a main-executable RVA.
+4. Preserve the full log, verify the loader's patch count, and capture the next exception if one occurs.
+
 ## 7. Current interpretation
 
 ### Confirmed
@@ -349,6 +397,7 @@ This instruction sequence is consistent with another pair of unaligned 256-bit s
 9. A 2026-11-28 tracking-enabled run confirmed fault tracking on, a mapped base of `0x6fffed550000`, and 1,242 patched stores; it then faulted at main-image RVA `0x22f7e6` on a `vmovups [r12+0x60], ymm0` instruction.
 10. A subsequent run's supplied exception was at RVA `0x22f7f4` on `vmovups [r12+0x78], ymm0`, 14 bytes later. Its startup output confirmed `fault tracking on` and 1,244 patched stores, verifying that the two preceding sites were added to the patch set.
 11. The next run's startup excerpt confirms `fault tracking on`, mapped base `0x6fffed550000`, and 1,245 patched stores. Its exception at `0x6fffee32821a` is therefore at confirmed main-image RVA `0xDD821A`; the supplied bytes also identify a second candidate store at RVA `0xDD8222`.
+12. A further exception occurred at `0x6ffff2498e54`; the instruction at the RIP decodes to `vmovups [rsi], ymm4`. Relative to the last confirmed base, the candidate RVA is `0x4F48E54`, but the mapped base and patch count from this latest run are still required to confirm it.
 11. A later exception was reported at `0x6fffee32821a`, with bytes decoding to two consecutive 256-bit `vmovups` stores. The same run's startup excerpt confirms the main-image base `0x6fffed550000` and 1,245 stores patched, giving confirmed main-image RVAs `0xDD821A` and `0xDD8222` for the two candidate sites.
 
 ### Strong performance lead
@@ -362,14 +411,16 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 - Which exact shader hashes account for the largest visually significant missing passes.
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
 - Whether adding RVA `0x22f7f4` will allow that first store sequence to complete without another Rosetta exception.
-- Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let this part of the title proceed without another Rosetta exception.
+- Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let that part of the title proceed without another Rosetta exception.
+- Whether the latest exception address belongs to the main executable in that run, and whether provisional RVA `0x4F48E54` identifies the reported `vmovups [rsi], ymm4` instruction in an executable section.
 - Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
 
 ## 8. Recommended next experiments
 
 1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
 2. **Continue the wide-store sequence in a controlled way.** The second attempt's startup summary is confirmed at 1,244 patched stores, including RVAs `0x22f7e6` and `0x22f7ed`. Add `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs; the expected count is 1,245.
-3. **Retain the full log for the next attempt.** Record the startup patch count and any `not a masked store or a plain 256-bit store` warnings, then capture the next RIP and instruction bytes if Rosetta still stops.
+3. **Verify and record the latest exception.** Check `/tmp/victory-rva-test-3.log` for the current base, patch count, and loaded modules before assigning RVA `0x4F48E54` or changing the patch list.
+4. **Retain the full log for the next attempt.** Record the startup patch count and any `not a masked store or a plain 256-bit store` warnings, then capture the next RIP and instruction bytes if Rosetta still stops.
 4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
 5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
 
