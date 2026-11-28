@@ -354,33 +354,49 @@ Interpreting the supplied 64-bit words as little-endian instruction bytes, the b
 c5 fc 11 26 48 89 f0 c4 e3 6d 18 d3 01 c5 f5 15 ...
 ```
 
-The instruction at the reported RIP is:
+The instruction at the reported RIP is a **four-byte** VEX-encoded 256-bit unaligned store:
 
 ```asm
 vmovups [rsi], ymm4
 ```
 
-This is a 256-bit unaligned vector store to the address held in `rsi`. The following bytes begin other instructions (`mov rax, rsi` and a VEX-encoded instruction); they are **not** evidence of a second adjacent `vmovups` store. Only the first store is identified as the current fault RIP, so do not add a second guessed RVA from this byte sequence.
+The following bytes begin other instructions (`mov rax, rsi` and a VEX-encoded instruction); they are not a second adjacent `vmovups` store.
 
-The most recent previously confirmed main-image base was `0x6fffed550000`. **If the run that produced this exception used that same base**, the candidate offset is:
+The latest startup excerpt, supplied after the exception, confirms:
+
+- Fault tracking: `on`
+- Main image base: `0x6fffed550000`
+- Masked/vector stores patched by `VICTORY_PATCH_MASKED`: **1,247**
+
+The candidate main-image-relative offset is therefore:
 
 ```text
 0x6ffff2498e54 - 0x6fffed550000 = 0x04f48e54
 ```
 
-That gives a **provisional** main-image RVA of `0x4F48E54`. It is not yet a confirmed RVA because the startup mapping line from `/tmp/victory-rva-test-3.log` has not been supplied. Confirm the mapping from this exact process before using the offset in a patch list. If the base differs, calculate the RVA from the current run's base instead.
+This gives a candidate RVA of **`0x4F48E54`**, provided the reported instruction address belongs to the mapped main image's executable section. The startup excerpt confirms the image base, but the actual bytes and section membership at this RVA still need to be verified against the cached mapped image.
 
-The accompanying log lines show host copies of title memory being released while memory is low, followed by completed DirectStorage read batches (including one batch of 1,309 requests). Those messages show memory-pressure handling and active storage progress; they do not identify the cause of the Rosetta exception. The process still terminates with a Rosetta synchronous-exception trap.
+#### Why the existing individual-RVA patcher is not sufficient
 
-The shell's zsh termination line shows an empty-looking `VICTORY_PATCH_MASKED=` assignment, but, as in the previous run, this shell rendering is not a reliable substitute for the loader's own startup summary. The current run's `fault tracking`, `mapped at`, `masked stores N patched to plain stores`, and loaded-module lines are still required. In particular, the expected count is **1,247** only if all five extra sites from the prior confirmed sequence are still included (the eight built-in build-specific sites plus the five manually named RVAs: `0x22f7e6`, `0x22f7ed`, `0x22f7f4`, `0xdd821a`, `0xdd8222`).
+`crates/victory-loader/src/masked.rs` explicitly rejects plain 256-bit stores shorter than five bytes in `decode_wide_move`: the normal patch is a five-byte relative jump, and a four-byte instruction does not have room for it. Adding RVA `4f48e54` to `VICTORY_PATCH_MASKED` alone will not patch this instruction.
+
+The repository provides a separate mechanism for this exact case:
+
+- `cargo xtask wide-stores <cached title image> > wide-sites.txt` uses `llvm-objdump` to enumerate the title image's 256-bit stores.
+- For a four-byte store, the generator can include adjacent movable instructions in a patch site, provided no branch target or unsafe instruction prevents it.
+- `VICTORY_PATCH_WIDE=<file>` applies the generated site list by rewriting the 256-bit stores as two 128-bit halves.
+
+The source comments identify the cached mapped executable as `<cache_dir>/images/victory-image-<executable-hash>.dll`. The `victory config` command prints `cache_dir`, so the local cache path can be resolved without printing or transmitting the game installation path.
 
 #### Immediate follow-up
 
-1. Verify this run's own image base, patch count, and module list:
-   `grep -E 'fault tracking|mapped at|masked stores|wide stores|title dll' /tmp/victory-rva-test-3.log`
-2. If the base is `0x6fffed550000`, inspect the executable image at RVA `0x4f48e54` and confirm the bytes decode there to `vmovups [rsi], ymm4`. Only then add `4f48e54` to the existing explicit patch list.
-3. If the mapping differs, recalculate from the current run's base. If the address belongs to a different loaded image, use that image's own patch mechanism rather than treating it as a main-executable RVA.
-4. Preserve the full log, verify the loader's patch count, and capture the next exception if one occurs.
+1. Use `tools/macos/victory.sh config` locally to obtain `cache_dir`, then locate `images/victory-image-b99f876b74d4a77f03af5f878223b27bd647b5c35a79d5decd9f716504239e93.dll`.
+2. Run `cargo xtask wide-stores <cached-image> > /tmp/victory-wide-sites.txt`. The command requires `llvm-objdump` (installable with `brew install llvm` if absent). Its stderr summary reports the number of 256-bit stores found, patch sites listed, and four-byte stores it could not safely cover.
+3. When using the complete generated list, set `VICTORY_PATCH_MASKED=all` for the scanned masked/vector stores and `VICTORY_PATCH_WIDE=/tmp/victory-wide-sites.txt` for the remaining unmasked 256-bit stores. Do not also keep the old manually named wide-store RVAs in `VICTORY_PATCH_MASKED`: the generated wide list includes those unmasked stores, and applying both patch mechanisms to overlapping sites can make the second patch reject already-modified bytes.
+4. Confirm startup reports both `masked stores ... patched to plain stores` and `wide stores ... split into 128-bit halves`. Record the patched and refused counts; do not assume every site was patched.
+5. Preserve the complete log and inspect the next Rosetta RIP if one occurs. A listed four-byte store may still be left unpatched if the generator cannot safely move enough adjacent instructions or a branch targets the candidate run.
+
+The accompanying log lines showed host copies of title memory being released while memory was low, followed by completed DirectStorage read batches (including one batch of 1,309 requests). These establish memory-pressure handling and ongoing storage progress, but do not identify the cause of the Rosetta exception.
 
 ## 7. Current interpretation
 
@@ -412,14 +428,14 @@ The wholesale title-memory-copy fallback is the most concrete explanation for th
 - Whether the black window is primarily due to dropped/refused pipelines, a later rendering/presentation problem, or more than one issue.
 - Whether adding RVA `0x22f7f4` will allow that first store sequence to complete without another Rosetta exception.
 - Whether adding the two newly decoded stores at RVAs `0xDD821A` and `0xDD8222` will let that part of the title proceed without another Rosetta exception.
-- Whether the latest exception address belongs to the main executable in that run, and whether provisional RVA `0x4F48E54` identifies the reported `vmovups [rsi], ymm4` instruction in an executable section.
+- Whether RVA `0x4F48E54` is in the cached main image's executable `.text` section and is included in the generated `wide-stores` site list.
 - Whether further unaligned 256-bit stores in the same sequence, or elsewhere in the title/DLL images, will produce additional Rosetta exceptions.
 
 ## 8. Recommended next experiments
 
 1. **Preserve the current run as the baseline.** Keep the full log and record the environment switches used by the launcher. Do not compare runs if the shader cache, game build, output size, or launch options changed unnoticed.
 2. **Continue the wide-store sequence in a controlled way.** The second attempt's startup summary is confirmed at 1,244 patched stores, including RVAs `0x22f7e6` and `0x22f7ed`. Add `0x22f7f4` while preserving `all` and all eight existing Series 1.0.2.1 RVAs; the expected count is 1,245.
-3. **Verify and record the latest exception.** Check `/tmp/victory-rva-test-3.log` for the current base, patch count, and loaded modules before assigning RVA `0x4F48E54` or changing the patch list.
+3. **Use the complete wide-store patcher for plain 256-bit stores.** The current faulting `vmovups [rsi], ymm4` is four bytes long, so `VICTORY_PATCH_MASKED` cannot patch it by itself. Generate the full site list with `cargo xtask wide-stores` from the cached mapped title image and apply it with `VICTORY_PATCH_WIDE`.
 4. **Retain the full log for the next attempt.** Record the startup patch count and any `not a masked store or a plain 256-bit store` warnings, then capture the next RIP and instruction bytes if Rosetta still stops.
 4. **Separate shader losses by hash and refusal reason.** Group wave64-lowering refusals, mesh-output-limit refusals, translation failures, host-pipeline creation refusals, and compilation timeouts. This will distinguish correctness gaps from scheduling/cache misses.
 5. **Re-test the visual result after the above are isolated.** Record whether the window remains black, whether audio continues, and whether a frame/present counter advances.
